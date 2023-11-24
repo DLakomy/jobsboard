@@ -46,9 +46,9 @@ class JobRoutes[F[_]: Concurrent: Logger] private extends Http4sDsl[F]:
     case req @ POST -> Root / "create" =>
       for
         jobInfo <- req.as[JobInfo].logError(e => s"Parsing payload failed: $e")
-        job <- createJob(jobInfo)
-        _ <- database.put(job.id, job).pure[F]
-        resp <- Created(job.id)
+        job     <- createJob(jobInfo)
+        _       <- database.put(job.id, job).pure[F]
+        resp    <- Created(job.id)
       yield resp
 
   // PUT /jobs/uuid { jobInfo }
@@ -58,8 +58,8 @@ class JobRoutes[F[_]: Concurrent: Logger] private extends Http4sDsl[F]:
         case Some(job) =>
           for
             jobInfo <- req.as[JobInfo]
-            _ <- database.put(id, job.copy(jobInfo = jobInfo)).pure[F]
-            resp <- Ok()
+            _       <- database.put(id, job.copy(jobInfo = jobInfo)).pure[F]
+            resp    <- Ok()
           yield resp
         case None => NotFound(FailureResponse(s"Cannot update job $id: not found"))
 
@@ -69,7 +69,7 @@ class JobRoutes[F[_]: Concurrent: Logger] private extends Http4sDsl[F]:
       database.get(id) match
         case Some(job) =>
           for
-            _ <- database.remove(id).pure[F]
+            _    <- database.remove(id).pure[F]
             resp <- Ok()
           yield resp
         case None => NotFound(FailureResponse(s"Cannot delete job $id: not found"))
