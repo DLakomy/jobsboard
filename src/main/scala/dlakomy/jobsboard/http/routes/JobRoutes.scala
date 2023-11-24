@@ -9,12 +9,13 @@ import org.http4s.*
 import org.http4s.circe.CirceEntityCodec.*
 import org.http4s.dsl.*
 import org.http4s.server.*
+import org.typelevel.log4cats.Logger
 
 import java.util.UUID
 import scala.collection.mutable
 
 
-class JobRoutes[F[_]: Concurrent] private extends Http4sDsl[F]:
+class JobRoutes[F[_]: Concurrent: Logger] private extends Http4sDsl[F]:
 
   // "database"
   private val database = mutable.Map[UUID, Job]()
@@ -40,11 +41,13 @@ class JobRoutes[F[_]: Concurrent] private extends Http4sDsl[F]:
       active = true
     ).pure[F]
 
+  import dlakomy.jobsboard.logging.syntax.*
   private val createJobRoute: HttpRoutes[F] = HttpRoutes.of[F]:
     case req @ POST -> Root / "create" =>
       for
-        jobInfo <- req.as[JobInfo]
+        jobInfo <- req.as[JobInfo].logError(e => s"Parsing payload failed: $e")
         job <- createJob(jobInfo)
+        _ <- database.put(job.id, job).pure[F]
         resp <- Created(job.id)
       yield resp
 
@@ -66,7 +69,6 @@ class JobRoutes[F[_]: Concurrent] private extends Http4sDsl[F]:
       database.get(id) match
         case Some(job) =>
           for
-            jobInfo <- req.as[JobInfo]
             _ <- database.remove(id).pure[F]
             resp <- Ok()
           yield resp
@@ -78,4 +80,4 @@ class JobRoutes[F[_]: Concurrent] private extends Http4sDsl[F]:
 
 
 object JobRoutes:
-  def apply[F[_]: Concurrent] = new JobRoutes[F]
+  def apply[F[_]: Concurrent: Logger] = new JobRoutes[F]
