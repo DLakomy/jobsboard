@@ -1,6 +1,6 @@
 package dlakomy.jobsboard.config
 
-import cats.MonadThrow
+import cats.effect.*
 import cats.syntax.all.*
 import pureconfig.ConfigReader
 import pureconfig.ConfigSource
@@ -11,7 +11,7 @@ import scala.reflect.ClassTag
 
 object syntax:
   extension (source: ConfigSource)
-    def loadF[F[_], A: ClassTag: ConfigReader](using F: MonadThrow[F]): F[A] =
+    def loadF[F[_], A: ClassTag: ConfigReader](using F: Concurrent[F]): F[A] =
       F.pure(source.load[A])
         .flatMap:
           case Left(errors) => F.raiseError[A](ConfigReaderException(errors))

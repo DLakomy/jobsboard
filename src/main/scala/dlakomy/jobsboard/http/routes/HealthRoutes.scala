@@ -1,12 +1,12 @@
 package dlakomy.jobsboard.http.routes
 
-import cats.Monad
+import cats.effect.*
 import org.http4s.*
 import org.http4s.dsl.*
 import org.http4s.server.*
 
 
-class HealthRoutes[F[_]: Monad] private extends Http4sDsl[F]:
+class HealthRoutes[F[_]: Concurrent] private extends Http4sDsl[F]:
   private val healthRoute: HttpRoutes[F] = HttpRoutes.of[F]:
     case GET -> Root => Ok("Everything works")
 
@@ -14,4 +14,4 @@ class HealthRoutes[F[_]: Monad] private extends Http4sDsl[F]:
 
 
 object HealthRoutes:
-  def apply[F[_]: Monad] = new HealthRoutes[F]
+  def apply[F[_]: Concurrent] = new HealthRoutes[F]

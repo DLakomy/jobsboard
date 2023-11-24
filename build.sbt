@@ -16,6 +16,9 @@ val logbackVersion = "1.4.11"
 val slf4jVersion = "2.0.9"
 val javaMailVersion = "1.6.2"
 
+// cats complained
+Compile / run / fork := true
+
 lazy val root = project
   .in(file("."))
   .settings(
