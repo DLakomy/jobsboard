@@ -1,6 +1,5 @@
 package dlakomy.jobsboard.core
 
-import cats.data.NonEmptyList
 import cats.effect.*
 import cats.implicits.*
 import dlakomy.jobsboard.domain.job.*
@@ -151,24 +150,24 @@ object LiveJobs:
 
   given jobRead: Read[Job] = Read[
     (
-        UUID,                         // id
-        Long,                         // date
-        String,                       // ownerEmail
-        String,                       // company
-        String,                       // title
-        String,                       // description
-        String,                       // externalUrl
-        Boolean,                      // remote
-        String,                       // location
-        Option[Int],                  // salaryLo
-        Option[Int],                  // salaryHi
-        Option[String],               // currency
-        Option[String],               // country
-        Option[NonEmptyList[String]], // tags
-        Option[String],               // image
-        Option[String],               // seniority
-        Option[String],               // other
-        Boolean                       // active
+        UUID,                 // id
+        Long,                 // date
+        String,               // ownerEmail
+        String,               // company
+        String,               // title
+        String,               // description
+        String,               // externalUrl
+        Boolean,              // remote
+        String,               // location
+        Option[Int],          // salaryLo
+        Option[Int],          // salaryHi
+        Option[String],       // currency
+        Option[String],       // country
+        Option[List[String]], // tags
+        Option[String],       // image
+        Option[String],       // seniority
+        Option[String],       // other
+        Boolean               // active
     )
   ].map:
     case (
@@ -185,7 +184,7 @@ object LiveJobs:
           salaryHi: Option[Int] @unchecked,
           currency: Option[String] @unchecked,
           country: Option[String] @unchecked,
-          tags: Option[NonEmptyList[String]] @unchecked,
+          tags: Option[List[String]] @unchecked,
           image: Option[String] @unchecked,
           seniority: Option[String] @unchecked,
           other: Option[String] @unchecked,
