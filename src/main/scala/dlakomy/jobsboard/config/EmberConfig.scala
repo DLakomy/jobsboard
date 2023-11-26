@@ -7,9 +7,9 @@ import pureconfig.error.CannotConvert
 import pureconfig.generic.derivation.default.*
 
 
-final case class Config(host: Host, port: Port) derives ConfigReader
+final case class EmberConfig(host: Host, port: Port) derives ConfigReader
 
-object Config:
+object EmberConfig:
   given ConfigReader[Host] = ConfigReader[String].emap: hostString =>
     Host
       .fromString(hostString)
