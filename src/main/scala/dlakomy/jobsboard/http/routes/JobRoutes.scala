@@ -5,18 +5,17 @@ import cats.syntax.all.*
 import dlakomy.jobsboard.core.*
 import dlakomy.jobsboard.domain.job.*
 import dlakomy.jobsboard.http.responses.*
-import dlakomy.jobsboard.logging.syntax.*
+import dlakomy.jobsboard.http.validation.syntax.*
 import io.circe.generic.auto.*
 import org.http4s.*
 import org.http4s.circe.CirceEntityCodec.*
-import org.http4s.dsl.*
 import org.http4s.server.*
 import org.typelevel.log4cats.Logger
 
 import java.util.UUID
 
 
-class JobRoutes[F[_]: Concurrent: Logger] private (jobs: Jobs[F]) extends Http4sDsl[F]:
+class JobRoutes[F[_]: Concurrent: Logger] private (jobs: Jobs[F]) extends HttpValidationDsl[F]:
 
   // POST /jobs?offset==x&limit=y { filters } // TODO add query params and filters
   private val allJobsRoute: HttpRoutes[F] = HttpRoutes.of[F]:
@@ -38,22 +37,22 @@ class JobRoutes[F[_]: Concurrent: Logger] private (jobs: Jobs[F]) extends Http4s
   // POST /jobs { jobInfo }
   private val createJobRoute: HttpRoutes[F] = HttpRoutes.of[F]:
     case req @ POST -> Root / "create" =>
-      for
-        jobInfo <- req.as[JobInfo].logError(e => s"Parsing payload failed: $e")
-        jobId   <- jobs.create("TODO@dlakomy.pl", jobInfo)
-        resp    <- Created(jobId)
-      yield resp
+      req.validate[JobInfo]: jobInfo =>
+        for
+          jobId <- jobs.create("TODO@dlakomy.pl", jobInfo)
+          resp  <- Created(jobId)
+        yield resp
 
   // PUT /jobs/uuid { jobInfo }
   private val updateJobRoute: HttpRoutes[F] = HttpRoutes.of[F]:
     case req @ PUT -> Root / UUIDVar(id) =>
-      for
-        jobInfo     <- req.as[JobInfo]
-        maybeNewJob <- jobs.update(id, jobInfo)
-        resp <- maybeNewJob match
-          case Some(job) => Ok()
-          case None      => NotFound(FailureResponse(s"Cannot update job $id: not found"))
-      yield resp
+      req.validate[JobInfo]: jobInfo =>
+        for
+          maybeNewJob <- jobs.update(id, jobInfo)
+          resp <- maybeNewJob match
+            case Some(job) => Ok()
+            case None      => NotFound(FailureResponse(s"Cannot update job $id: not found"))
+        yield resp
 
   // DELETE /jobs/uuid
   private val deleteJobRoute: HttpRoutes[F] = HttpRoutes.of[F]:
