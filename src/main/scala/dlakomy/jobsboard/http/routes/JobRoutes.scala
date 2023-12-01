@@ -4,6 +4,7 @@ import cats.effect.*
 import cats.syntax.all.*
 import dlakomy.jobsboard.core.*
 import dlakomy.jobsboard.domain.job.*
+import dlakomy.jobsboard.domain.pagination.*
 import dlakomy.jobsboard.http.responses.*
 import dlakomy.jobsboard.http.validation.syntax.*
 import io.circe.generic.auto.*
@@ -17,11 +18,15 @@ import java.util.UUID
 
 class JobRoutes[F[_]: Concurrent: Logger] private (jobs: Jobs[F]) extends HttpValidationDsl[F]:
 
-  // POST /jobs?offset==x&limit=y { filters } // TODO add query params and filters
+  object LimitQueryParam  extends OptionalQueryParamDecoderMatcher[Int]("limit")
+  object OffsetQueryParam extends OptionalQueryParamDecoderMatcher[Int]("offset")
+
+  // POST /jobs?limit==x&offset=y { filters } // TODO add query params and filters
   private val allJobsRoute: HttpRoutes[F] = HttpRoutes.of[F]:
-    case POST -> Root =>
+    case req @ POST -> Root :? LimitQueryParam(limit) +& OffsetQueryParam(offset) =>
       for
-        jobsList <- jobs.all()
+        filter   <- req.as[JobFilter]
+        jobsList <- jobs.all(filter, Pagination(limit, offset))
         resp     <- Ok(jobsList)
       yield resp
 

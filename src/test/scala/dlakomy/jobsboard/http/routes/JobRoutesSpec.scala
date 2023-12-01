@@ -4,6 +4,7 @@ import cats.effect.*
 import cats.effect.testing.scalatest.AsyncIOSpec
 import dlakomy.jobsboard.core.*
 import dlakomy.jobsboard.domain.job.*
+import dlakomy.jobsboard.domain.pagination.Pagination
 import dlakomy.jobsboard.fixtures.*
 import io.circe.generic.auto.*
 import org.http4s.HttpRoutes
@@ -30,6 +31,10 @@ class JobRoutesSpec extends AsyncFreeSpec with AsyncIOSpec with Matchers with Ht
 
     override def all(): IO[List[Job]] =
       IO.pure(List(AwesomeJob))
+
+    override def all(filter: JobFilter, pagination: Pagination): IO[List[Job]] =
+      if (filter.remote) IO.pure(List())
+      else IO.pure(List(AwesomeJob))
 
     override def find(id: UUID): IO[Option[Job]] =
       if (id == AwesomeJobUuid)
@@ -73,11 +78,23 @@ class JobRoutesSpec extends AsyncFreeSpec with AsyncIOSpec with Matchers with Ht
       for
         response <- jobRoutes.orNotFound.run(
           Request(method = Method.POST, uri = uri"/jobs")
+            .withEntity(JobFilter())
         )
         retrieved <- response.as[List[Job]]
       yield
         response.status shouldBe Status.Ok
         retrieved shouldBe List(AwesomeJob)
+
+    "should return all jobs that satisfy a filter" in:
+      for
+        response <- jobRoutes.orNotFound.run(
+          Request(method = Method.POST, uri = uri"/jobs")
+            .withEntity(JobFilter(remote = true))
+        )
+        retrieved <- response.as[List[Job]]
+      yield
+        response.status shouldBe Status.Ok
+        retrieved shouldBe List.empty
 
     "should create a new job" in:
       for
