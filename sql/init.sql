@@ -24,3 +24,18 @@ CREATE TABLE jobs(
 
 ALTER TABLE jobs
 ADD CONSTRAINT pk_jobs PRIMARY KEY (id);
+
+CREATE TABLE users (
+  email text NOT NULL
+, hashedPassword text NOT NULL
+, firstName text
+, lastName text
+, company text
+, role text NOT NULL
+);
+
+ALTER TABLE users
+ADD CONSTRAINT pk_users PRIMARY KEY (email);
+
+ALTER TABLE users
+ADD CONSTRAINT ck_users_role CHECK (role in ('ADMIN', 'RECRUITER'));
