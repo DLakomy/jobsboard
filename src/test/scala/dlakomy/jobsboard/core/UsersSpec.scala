@@ -66,7 +66,7 @@ class UsersSpec extends AsyncFreeSpec with AsyncIOSpec with Matchers with Inside
             case Left(e) => e shouldBe a[PSQLException]
             case _       => fail()
 
-    "should return None when updting nonexistent user" in:
+    "should return None when updating nonexistent user" in:
       transactor.use: xa =>
         val program =
           for
