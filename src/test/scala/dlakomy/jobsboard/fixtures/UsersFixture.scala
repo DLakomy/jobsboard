@@ -11,3 +11,7 @@ trait UsersFixture:
     User("john@newman.github.io", "somethingelsish", Some("John"), Some("Newman"), Some("Newman corp."), Role.RECRUITER)
   val updatedJohn =
     User("john@lakomy.github.io", "somethingelsebetter", Some("JOHN"), Some("HUNGRYN'T"), Some("Adobe"), Role.RECRUITER)
+
+  val dawidEmail        = dawid.email
+  val dawidPasswordHash = dawid.hashedPassword
+  val johnEmail         = john.email
