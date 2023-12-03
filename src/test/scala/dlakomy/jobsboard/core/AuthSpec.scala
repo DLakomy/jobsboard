@@ -7,7 +7,6 @@ import dlakomy.jobsboard.domain.auth.NewPasswordInfo
 import dlakomy.jobsboard.domain.security.*
 import dlakomy.jobsboard.domain.user.*
 import dlakomy.jobsboard.fixtures.*
-import doobie.free.resultset
 import org.scalatest.freespec.AsyncFreeSpec
 import org.scalatest.matchers.should.Matchers
 import org.typelevel.log4cats.Logger
@@ -62,7 +61,7 @@ class AuthSpec extends AsyncFreeSpec with AsyncIOSpec with Matchers with UsersFi
     "login should return a token if the users exists, and the password is correct" in:
       val program = for
         auth       <- LiveAuth[IO](mockedUsers, mockedAuthenticator)
-        maybeToken <- auth.login(dawidEmail, dawidPasswordHash)
+        maybeToken <- auth.login(dawidEmail, dawidPassword)
       yield maybeToken
 
       program.asserting(_ shouldBe defined)
@@ -73,7 +72,7 @@ class AuthSpec extends AsyncFreeSpec with AsyncIOSpec with Matchers with UsersFi
         maybeUser <- auth.signUp(NewUserInfo(dawidEmail, "somepass", None, None, None))
       yield maybeUser
 
-      program.asserting(_ shouldBe defined)
+      program.asserting(_ shouldBe None)
 
     "signing up should create a completely new user" in:
       val newUserInfo = NewUserInfo("bob@gmail.com", "somepass", Some("Bob"), Some("Bobinsky"), Some("Bob S.A."))
@@ -105,13 +104,13 @@ class AuthSpec extends AsyncFreeSpec with AsyncIOSpec with Matchers with UsersFi
         result <- auth.changePassword(dawidEmail, NewPasswordInfo("invalid", "newpassword"))
       yield result
 
-      program.asserting(_ shouldBe Right(None))
+      program.asserting(_ shouldBe Left("Invalid password"))
 
     "change password should change password if all params are correct" in:
       val newPassword = "newpassword"
       val program = for
         auth   <- LiveAuth[IO](mockedUsers, mockedAuthenticator)
-        result <- auth.changePassword(dawidEmail, NewPasswordInfo(dawidPasswordHash, newPassword))
+        result <- auth.changePassword(dawidEmail, NewPasswordInfo(dawidPassword, newPassword))
         isNicePassword <- result match
           case Right(Some(user)) =>
             BCrypt.checkpwBool[IO](newPassword, PasswordHash[BCrypt](user.hashedPassword))
