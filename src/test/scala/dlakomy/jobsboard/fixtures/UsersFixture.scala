@@ -44,3 +44,7 @@ trait UsersFixture:
   val dawidPassword     = "something"
   val dawidPasswordHash = dawid.hashedPassword
   val johnEmail         = john.email
+  val johnPassword      = "somethingelse"
+
+  val newUserDawid = NewUserInfo(dawidEmail, dawidPassword, dawid.firstName, dawid.lastName, dawid.company)
+  val newUserJohn  = NewUserInfo(johnEmail, johnPassword, john.firstName, john.lastName, john.company)

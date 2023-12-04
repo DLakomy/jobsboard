@@ -22,7 +22,7 @@ class AuthRoutes[F[_]: Concurrent: Logger] private (auth: Auth[F]) extends HttpV
     case POST -> Root / "login" =>
       Ok("TODO")
 
-  // POST /auth/users { NewUserInfo } => 201 Created
+  // POST /auth/users { NewUserInfo } => 201 Created | BadRequest (eg. when user exists)
   private val createUserRoute: HttpRoutes[F] = HttpRoutes.of[F]:
     case POST -> Root / "users" =>
       Ok("TODO")
