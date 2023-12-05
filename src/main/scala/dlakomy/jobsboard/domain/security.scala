@@ -1,12 +1,13 @@
 package dlakomy.jobsboard.domain
 
 import dlakomy.jobsboard.domain.user.*
-import tsec.authentication.AugmentedJWT
+import org.http4s.Response
+import tsec.authentication.*
 import tsec.mac.jca.HMACSHA256
-import tsec.authentication.JWTAuthenticator
 
 
 object security:
   type Crypto              = HMACSHA256
   type JwtToken            = AugmentedJWT[HMACSHA256, String]
   type Authenticator[F[_]] = JWTAuthenticator[F, String, User, Crypto]
+  type AuthRoute[F[_]]     = PartialFunction[SecuredRequest[F, User, JwtToken], F[Response[F]]]

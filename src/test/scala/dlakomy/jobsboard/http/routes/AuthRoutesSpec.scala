@@ -5,8 +5,6 @@ import cats.effect.*
 import cats.effect.testing.scalatest.AsyncIOSpec
 import dlakomy.jobsboard.core.*
 import dlakomy.jobsboard.domain.auth.*
-import dlakomy.jobsboard.domain.job.*
-import dlakomy.jobsboard.domain.pagination.Pagination
 import dlakomy.jobsboard.domain.security.*
 import dlakomy.jobsboard.domain.user.*
 import dlakomy.jobsboard.fixtures.*
@@ -27,8 +25,6 @@ import tsec.authentication.JWTAuthenticator
 import tsec.jws.mac.JWTMac
 import tsec.mac.jca.HMACSHA256
 
-import java.util.UUID
-
 import concurrent.duration.*
 
 
@@ -38,10 +34,28 @@ class AuthRoutesSpec extends AsyncFreeSpec with AsyncIOSpec with Matchers with H
   // PREP
   ////////////////////////////////////////////////////////////
   private val mockedAuth: Auth[IO] = new Auth[IO]:
-    // TODO Dawid must already exists, John not
-    def login(email: String, password: String): IO[Option[JwtToken]]                                      = ???
-    def signUp(newUserInfo: NewUserInfo): IO[Option[User]]                                                = ???
-    def changePassword(email: String, newPasswordInfo: NewPasswordInfo): IO[Either[String, Option[User]]] = ???
+    def login(email: String, password: String): IO[Option[JwtToken]] =
+      if (email == dawidEmail && password == dawidPassword)
+        mockedAuthenticator.create(dawidEmail).map(Some(_))
+      else
+        IO.pure(None)
+
+    def signUp(newUserInfo: NewUserInfo): IO[Option[User]] =
+      if (newUserInfo.email == johnEmail)
+        IO.pure(Some(john))
+      else
+        IO.pure(None)
+
+    def changePassword(email: String, newPasswordInfo: NewPasswordInfo): IO[Either[String, Option[User]]] =
+      if (email == dawidEmail)
+        if (newPasswordInfo.oldPassword == dawidPassword)
+          IO.pure(Right(Some(dawid)))
+        else
+          IO.pure(Left("Invalid password"))
+      else
+        IO.pure(Right(None))
+
+    def authenticator: Authenticator[IO] = mockedAuthenticator
 
   private val mockedAuthenticator: Authenticator[IO] =
     val key =
