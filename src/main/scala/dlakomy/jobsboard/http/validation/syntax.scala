@@ -11,7 +11,6 @@ import org.http4s.*
 import org.http4s.circe.CirceEntityCodec.*
 import org.http4s.dsl.*
 import org.typelevel.log4cats.Logger
-
 import validators.*
 
 
@@ -22,7 +21,7 @@ object syntax:
   trait HttpValidationDsl[F[_]: MonadThrow: Logger] extends Http4sDsl[F]:
 
     extension (req: Request[F])
-      def validate[A: Validator](serverLogicIfValid: A => F[Response[F]])(using EntityDecoder[F, A]): F[Response[F]] =
+      def withValidated[A: Validator](serverLogicIfValid: A => F[Response[F]])(using EntityDecoder[F, A]): F[Response[F]] =
         req
           .as[A]
           .logError(e => s"Parsing payload failed: $e")

@@ -42,7 +42,7 @@ class JobRoutes[F[_]: Concurrent: Logger] private (jobs: Jobs[F]) extends HttpVa
   // POST /jobs { jobInfo }
   private val createJobRoute: HttpRoutes[F] = HttpRoutes.of[F]:
     case req @ POST -> Root / "create" =>
-      req.validate[JobInfo]: jobInfo =>
+      req.withValidated[JobInfo]: jobInfo =>
         for
           jobId <- jobs.create("TODO@dlakomy.pl", jobInfo)
           resp  <- Created(jobId)
@@ -51,7 +51,7 @@ class JobRoutes[F[_]: Concurrent: Logger] private (jobs: Jobs[F]) extends HttpVa
   // PUT /jobs/uuid { jobInfo }
   private val updateJobRoute: HttpRoutes[F] = HttpRoutes.of[F]:
     case req @ PUT -> Root / UUIDVar(id) =>
-      req.validate[JobInfo]: jobInfo =>
+      req.withValidated[JobInfo]: jobInfo =>
         for
           maybeNewJob <- jobs.update(id, jobInfo)
           resp <- maybeNewJob match
