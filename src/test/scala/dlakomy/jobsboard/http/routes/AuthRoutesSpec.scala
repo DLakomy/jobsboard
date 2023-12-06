@@ -34,19 +34,19 @@ class AuthRoutesSpec extends AsyncFreeSpec with AsyncIOSpec with Matchers with H
   // PREP
   ////////////////////////////////////////////////////////////
   private val mockedAuth: Auth[IO] = new Auth[IO]:
-    def login(email: String, password: String): IO[Option[JwtToken]] =
+    override def login(email: String, password: String): IO[Option[JwtToken]] =
       if (email == dawidEmail && password == dawidPassword)
         mockedAuthenticator.create(dawidEmail).map(Some(_))
       else
         IO.pure(None)
 
-    def signUp(newUserInfo: NewUserInfo): IO[Option[User]] =
+    override def signUp(newUserInfo: NewUserInfo): IO[Option[User]] =
       if (newUserInfo.email == johnEmail)
         IO.pure(Some(john))
       else
         IO.pure(None)
 
-    def changePassword(email: String, newPasswordInfo: NewPasswordInfo): IO[Either[String, Option[User]]] =
+    override def changePassword(email: String, newPasswordInfo: NewPasswordInfo): IO[Either[String, Option[User]]] =
       if (email == dawidEmail)
         if (newPasswordInfo.oldPassword == dawidPassword)
           IO.pure(Right(Some(dawid)))
@@ -55,7 +55,9 @@ class AuthRoutesSpec extends AsyncFreeSpec with AsyncIOSpec with Matchers with H
       else
         IO.pure(Right(None))
 
-    def authenticator: Authenticator[IO] = mockedAuthenticator
+    override def delete(email: String): IO[Boolean] = IO.pure(true)
+
+    override def authenticator: Authenticator[IO] = mockedAuthenticator
 
   private val mockedAuthenticator: Authenticator[IO] =
     val key =
@@ -157,6 +159,24 @@ class AuthRoutesSpec extends AsyncFreeSpec with AsyncIOSpec with Matchers with H
           Request(method = Method.PUT, uri = uri"/auth/users/password")
             .withBearerToken(jwtToken)
             .withEntity(NewPasswordInfo(dawidPassword, "newpass"))
+        )
+      yield response.status shouldBe Status.Ok
+
+    "should return 401 if a non-admin tries to delete a user" in:
+      for
+        jwtToken <- mockedAuthenticator.create(johnEmail)
+        response <- authRoutes.orNotFound.run(
+          Request(method = Method.DELETE, uri = uri"/auth/users/dawid@lakomy.github.io")
+            .withBearerToken(jwtToken)
+        )
+      yield response.status shouldBe Status.Unauthorized
+
+    "should return 200 if an admin tries to delete a user" in:
+      for
+        jwtToken <- mockedAuthenticator.create(dawidEmail)
+        response <- authRoutes.orNotFound.run(
+          Request(method = Method.DELETE, uri = uri"/auth/users/john@lakomy.github.io")
+            .withBearerToken(jwtToken)
         )
       yield response.status shouldBe Status.Ok
 

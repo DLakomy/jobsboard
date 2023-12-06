@@ -15,6 +15,7 @@ trait Auth[F[_]]:
   def signUp(newUserInfo: NewUserInfo): F[Option[User]]
   def changePassword(email: String, newPasswordInfo: NewPasswordInfo): F[Either[String, Option[User]]]
   def authenticator: Authenticator[F]
+  def delete(email: String): F[Boolean]
 
 
 class LiveAuth[F[_]: Async: Logger] private (users: Users[F], override val authenticator: Authenticator[F])
@@ -68,6 +69,9 @@ class LiveAuth[F[_]: Async: Logger] private (users: Users[F], override val authe
         case Some(user) =>
           val NewPasswordInfo(oldPassword, newPassword) = newPasswordInfo
           checkAndUpdate(user, oldPassword, newPassword)
+
+  override def delete(email: String): F[Boolean] =
+    users.delete(email)
 
 
 object LiveAuth:
