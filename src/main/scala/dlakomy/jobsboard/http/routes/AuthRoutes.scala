@@ -71,7 +71,7 @@ class AuthRoutes[F[_]: Concurrent: Logger] private (auth: Auth[F]) extends HttpV
 
   // DELETE /auth/users/{email}
   private val deleteUserRoute: AuthRoute[F] =
-    case req @ delete -> Root / "users" / email asAuthed _ =>
+    case req @ DELETE -> Root / "users" / email asAuthed _ =>
       auth
         .delete(email)
         .flatMap:
