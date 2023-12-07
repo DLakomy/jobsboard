@@ -18,11 +18,11 @@ object Application extends IOApp.Simple:
   override def run = ConfigSource.default
     .loadF[IO, AppConfig]
     .flatMap:
-      case AppConfig(postgresConfig, emberConfig) =>
+      case AppConfig(postgresConfig, emberConfig, securityConfig) =>
         val appResource =
           for
             xa      <- Database.makePostgresResource[IO](postgresConfig)
-            core    <- Core[IO](xa)
+            core    <- Core[IO](xa)(securityConfig)
             httpApi <- HttpApi[IO](core)
             server <-
               EmberServerBuilder
