@@ -1,6 +1,5 @@
 package dlakomy.jobsboard.http.routes
 
-import cats.data.OptionT
 import cats.effect.*
 import cats.effect.testing.scalatest.AsyncIOSpec
 import dlakomy.jobsboard.core.*
@@ -13,22 +12,21 @@ import org.http4s.HttpRoutes
 import org.http4s.*
 import org.http4s.circe.CirceEntityCodec.*
 import org.http4s.dsl.*
-import org.http4s.headers.Authorization
 import org.http4s.implicits.*
 import org.scalatest.freespec.AsyncFreeSpec
 import org.scalatest.matchers.should.Matchers
 import org.typelevel.ci.CIStringSyntax
 import org.typelevel.log4cats.Logger
 import org.typelevel.log4cats.slf4j.Slf4jLogger
-import tsec.authentication.IdentityStore
-import tsec.authentication.JWTAuthenticator
-import tsec.jws.mac.JWTMac
-import tsec.mac.jca.HMACSHA256
-
-import concurrent.duration.*
 
 
-class AuthRoutesSpec extends AsyncFreeSpec with AsyncIOSpec with Matchers with Http4sDsl[IO] with UsersFixture:
+class AuthRoutesSpec
+    extends AsyncFreeSpec
+    with AsyncIOSpec
+    with Matchers
+    with Http4sDsl[IO]
+    with UsersFixture
+    with SecuredRouteFixture:
 
   ////////////////////////////////////////////////////////////
   // PREP
@@ -59,25 +57,9 @@ class AuthRoutesSpec extends AsyncFreeSpec with AsyncIOSpec with Matchers with H
 
     override def authenticator: Authenticator[IO] = mockedAuthenticator
 
-  private val mockedAuthenticator: Authenticator[IO] =
-    val key =
-      HMACSHA256.unsafeGenerateKey
-    val idStore: IdentityStore[IO, String, User] = (email: String) =>
-      if (email == dawidEmail) OptionT.pure(dawid)
-      else if (email == johnEmail) OptionT.pure(john)
-      else OptionT.none
-
-    JWTAuthenticator.unbacked.inBearerToken(1.day, None, idStore, key)
-
   given logger: Logger[IO] = Slf4jLogger.getLogger[IO]
   // this is what we are testing
   val authRoutes: HttpRoutes[IO] = AuthRoutes[IO](mockedAuth).routes
-
-  extension (r: Request[IO])
-    def withBearerToken(a: JwtToken): Request[IO] =
-      r.putHeaders:
-        val jwtString = JWTMac.toEncodedString[IO, HMACSHA256](a.jwt)
-        Authorization(Credentials.Token(AuthScheme.Bearer, jwtString))
 
   ////////////////////////////////////////////////////////////
   // TESTS
@@ -110,9 +92,7 @@ class AuthRoutesSpec extends AsyncFreeSpec with AsyncIOSpec with Matchers with H
       yield response.status shouldBe Status.Created
 
     "should return 401 if logout has no jwt" in:
-      for
-        jwtToken <- mockedAuthenticator.create(dawidEmail)
-        response <- authRoutes.orNotFound.run(
+      for response <- authRoutes.orNotFound.run(
           Request(method = Method.POST, uri = uri"/auth/logout")
         )
       yield response.status shouldBe Status.Unauthorized
@@ -166,7 +146,7 @@ class AuthRoutesSpec extends AsyncFreeSpec with AsyncIOSpec with Matchers with H
       for
         jwtToken <- mockedAuthenticator.create(johnEmail)
         response <- authRoutes.orNotFound.run(
-          Request(method = Method.DELETE, uri = uri"/auth/users/dawid@lakomy.github.io")
+          Request(method = Method.DELETE, uri = uri"/auth/users/dawid@dlakomy.github.io")
             .withBearerToken(jwtToken)
         )
       yield response.status shouldBe Status.Unauthorized

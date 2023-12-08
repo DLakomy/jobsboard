@@ -6,6 +6,7 @@ import doobie.postgres.implicits.*
 import doobie.util.*
 import tsec.authorization.AuthGroup
 import tsec.authorization.SimpleAuthEnum
+import dlakomy.jobsboard.domain.job.*
 
 
 object user:
@@ -16,7 +17,10 @@ object user:
       lastName: Option[String],
       company: Option[String],
       role: Role
-  ) derives Read
+  ) derives Read:
+    def owns(job: Job): Boolean = email == job.ownerEmail
+    def isAdmin: Boolean        = role == Role.ADMIN
+    def isRecruiter: Boolean    = role == Role.RECRUITER
 
   final case class NewUserInfo(
       email: String,

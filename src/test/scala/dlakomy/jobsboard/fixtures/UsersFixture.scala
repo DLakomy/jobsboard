@@ -5,7 +5,7 @@ import dlakomy.jobsboard.domain.user.*
 trait UsersFixture:
   val dawid =
     User(
-      "dawid@lakomy.github.io",
+      "dawid@dlakomy.github.io",
       "$2a$10$k7SC5Wz54II9QMrB7.FhEeYWApxNQH28tWGKcbtbkXTDE02yYq2Ba", // something
       Some("Dawid"),
       Some("Hungry"),

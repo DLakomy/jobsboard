@@ -12,11 +12,12 @@ import tsec.mac.jca.HMACSHA256
 
 
 object security:
-  type Crypto              = HMACSHA256
-  type JwtToken            = AugmentedJWT[HMACSHA256, String]
-  type Authenticator[F[_]] = JWTAuthenticator[F, String, User, Crypto]
-  type AuthRoute[F[_]]     = PartialFunction[SecuredRequest[F, User, JwtToken], F[Response[F]]]
-  type AuthRBAC[F[_]]      = BasicRBAC[F, Role, User, JwtToken]
+  type Crypto               = HMACSHA256
+  type JwtToken             = AugmentedJWT[HMACSHA256, String]
+  type Authenticator[F[_]]  = JWTAuthenticator[F, String, User, Crypto]
+  type AuthRoute[F[_]]      = PartialFunction[SecuredRequest[F, User, JwtToken], F[Response[F]]]
+  type AuthRBAC[F[_]]       = BasicRBAC[F, Role, User, JwtToken]
+  type SecuredHandler[F[_]] = SecuredRequestHandler[F, String, User, JwtToken]
 
   // RBAC
   given authRole[F[_]: MonadThrow]: AuthorizationInfo[F, Role, User] with

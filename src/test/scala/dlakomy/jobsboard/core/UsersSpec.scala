@@ -25,7 +25,7 @@ class UsersSpec extends AsyncFreeSpec with AsyncIOSpec with Matchers with Inside
         val program =
           for
             users     <- LiveUsers[IO](xa)
-            retrieved <- users.find("dawid@lakomy.github.io")
+            retrieved <- users.find("dawid@dlakomy.github.io")
           yield retrieved
 
         program.asserting(_ shouldBe Some(dawid))

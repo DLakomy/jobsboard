@@ -22,7 +22,7 @@ class AuthRoutes[F[_]: Concurrent: Logger] private (auth: Auth[F]) extends HttpV
 
   private val authenticator = auth.authenticator
 
-  private val securedHandler: SecuredRequestHandler[F, String, User, JwtToken] = SecuredRequestHandler(authenticator)
+  private val securedHandler: SecuredHandler[F] = SecuredRequestHandler(authenticator)
 
   // POST /auth/login { LoginInfo } => 200 OK with JWT as Authorization bearer
   private val loginRoute: HttpRoutes[F] = HttpRoutes.of[F]:
