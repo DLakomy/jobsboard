@@ -1,6 +1,9 @@
 package dlakomy.jobsboard.fixtures
 
 import dlakomy.jobsboard.domain.user.*
+import dlakomy.jobsboard.core.Users
+import cats.effect.IO
+
 
 trait UsersFixture:
   val dawid =
@@ -48,3 +51,11 @@ trait UsersFixture:
 
   val newUserDawid = NewUserInfo(dawidEmail, dawidPassword, dawid.firstName, dawid.lastName, dawid.company)
   val newUserJohn  = NewUserInfo(johnEmail, johnPassword, john.firstName, john.lastName, john.company)
+
+  val mockedUsers: Users[IO] = new Users[IO]:
+    override def find(email: String): IO[Option[User]] =
+      if (email == dawidEmail) IO.pure(Some(dawid))
+      else IO.pure(None)
+    override def create(user: User): IO[String]       = IO.pure(user.email)
+    override def update(user: User): IO[Option[User]] = IO.pure(Some(user))
+    override def delete(email: String): IO[Boolean]   = IO.pure(true)

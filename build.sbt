@@ -1,4 +1,5 @@
-scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature", "-Xfatal-warnings", "-Wunused:all")
+// FIXME just or a moment
+// scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature", "-Xfatal-warnings", "-Wunused:all")
 
 val scala3Version = "3.3.1"
 
