@@ -8,6 +8,7 @@ import org.http4s.*
 import org.http4s.headers.Authorization
 import tsec.authentication.IdentityStore
 import tsec.authentication.JWTAuthenticator
+import tsec.authentication.SecuredRequestHandler
 import tsec.jws.mac.JWTMac
 import tsec.mac.jca.HMACSHA256
 
@@ -31,3 +32,5 @@ trait SecuredRouteFixture extends UsersFixture:
       r.putHeaders:
         val jwtString = JWTMac.toEncodedString[IO, HMACSHA256](a.jwt)
         Authorization(Credentials.Token(AuthScheme.Bearer, jwtString))
+
+  given SecuredHandler[IO] = SecuredRequestHandler(mockedAuthenticator)

@@ -4,7 +4,6 @@ import cats.effect.*
 import cats.effect.testing.scalatest.AsyncIOSpec
 import dlakomy.jobsboard.core.*
 import dlakomy.jobsboard.domain.auth.*
-import dlakomy.jobsboard.domain.security.*
 import dlakomy.jobsboard.domain.user.*
 import dlakomy.jobsboard.fixtures.*
 import io.circe.generic.auto.*
@@ -32,9 +31,9 @@ class AuthRoutesSpec
   // PREP
   ////////////////////////////////////////////////////////////
   private val mockedAuth: Auth[IO] = new Auth[IO]:
-    override def login(email: String, password: String): IO[Option[JwtToken]] =
+    override def login(email: String, password: String): IO[Option[User]] =
       if (email == dawidEmail && password == dawidPassword)
-        mockedAuthenticator.create(dawidEmail).map(Some(_))
+        IO.pure(Some(dawid))
       else
         IO.pure(None)
 
@@ -55,11 +54,9 @@ class AuthRoutesSpec
 
     override def delete(email: String): IO[Boolean] = IO.pure(true)
 
-    override def authenticator: Authenticator[IO] = mockedAuthenticator
-
   given logger: Logger[IO] = Slf4jLogger.getLogger[IO]
   // this is what we are testing
-  val authRoutes: HttpRoutes[IO] = AuthRoutes[IO](mockedAuth).routes
+  val authRoutes: HttpRoutes[IO] = AuthRoutes[IO](mockedAuth, mockedAuthenticator).routes
 
   ////////////////////////////////////////////////////////////
   // TESTS
