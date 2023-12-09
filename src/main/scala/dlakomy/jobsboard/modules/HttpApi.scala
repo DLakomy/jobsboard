@@ -31,6 +31,7 @@ class HttpApi[F[_]: Concurrent: Logger] private (core: Core[F], authenticator: A
 object HttpApi:
 
   def createAuthenticator[F[_]: Sync](users: Users[F], securityConfig: SecurityConfig): F[Authenticator[F]] =
+    // danger: whatever enters this cache is stuck forever!
     val idStoreF: F[IdentityStore[F, String, User]] = Ref
       .of[F, Map[String, User]](Map.empty)
       .map: ref =>
