@@ -3,9 +3,6 @@ package dlakomy.jobsboard.core
 import cats.effect.*
 import cats.effect.testing.scalatest.AsyncIOSpec
 import dlakomy.jobsboard.config.TokenConfig
-import dlakomy.jobsboard.domain.job.JobFilter
-import dlakomy.jobsboard.domain.pagination.Pagination
-import dlakomy.jobsboard.fixtures.JobFixture
 import dlakomy.jobsboard.fixtures.UsersFixture
 import org.scalatest.freespec.AsyncFreeSpec
 import org.scalatest.matchers.should.Matchers
