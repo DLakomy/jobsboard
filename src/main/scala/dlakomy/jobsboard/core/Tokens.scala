@@ -70,7 +70,7 @@ class LiveTokens[F[_]: MonadCancelThrow: Logger] private (users: Users[F])(xa: T
   private def updateToken(email: String): F[String] = for
     token <- randomToken(8)
     _ <- sql"""
-      UPDATE recoverytokens (email, token, expiration)
+      UPDATE recoverytokens
          SET token = $token
            , expiration = ${System.currentTimeMillis() + tokenDuration}
        WHERE email = $email
