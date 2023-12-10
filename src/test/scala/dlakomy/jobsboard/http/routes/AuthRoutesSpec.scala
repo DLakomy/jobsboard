@@ -54,6 +54,9 @@ class AuthRoutesSpec
 
     override def delete(email: String): IO[Boolean] = IO.pure(true)
 
+    override def sendPasswordRecoveryToken(email: String): IO[Unit]                                       = ???
+    override def recoverPasswordFromToken(email: String, token: String, newPassword: String): IO[Boolean] = ???
+
   given logger: Logger[IO] = Slf4jLogger.getLogger[IO]
   // this is what we are testing
   val authRoutes: HttpRoutes[IO] = AuthRoutes[IO](mockedAuth, mockedAuthenticator).routes

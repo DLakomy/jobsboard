@@ -59,6 +59,14 @@ class AuthRoutes[F[_]: Concurrent: Logger: SecuredHandler] private (
             case Left(_)        => Forbidden()
         yield resp
 
+  // POST /auth/reset { ForgotPasswordInfo }
+  private val forgotPasswordRoute: HttpRoutes[F] = HttpRoutes.of[F]:
+    case req @ POST -> Root / "reset" => Ok("TODO")
+
+  // POST /auth/recover { RecoverPasswordInfo }
+  private val recoverPasswordRoute: HttpRoutes[F] = HttpRoutes.of[F]:
+    case req @ POST -> Root / "recover" => Ok("TODO")
+
   // POST /auth/logout { Authorization: Bearer {jwt} } => 200 OK
   private val logoutRoute: AuthRoute[F] =
     case req @ POST -> Root / "logout" asAuthed _ =>
@@ -77,7 +85,7 @@ class AuthRoutes[F[_]: Concurrent: Logger: SecuredHandler] private (
           case true  => Ok()
           case false => NotFound()
 
-  private val unauthedRoutes = loginRoute <+> createUserRoute
+  private val unauthedRoutes = loginRoute <+> createUserRoute <+> forgotPasswordRoute <+> recoverPasswordRoute
   private val authedRoutes = SecuredHandler[F].liftService(
     changePasswordRoute.restrictedTo(allRoles) |+|
       logoutRoute.restrictedTo(allRoles) |+|

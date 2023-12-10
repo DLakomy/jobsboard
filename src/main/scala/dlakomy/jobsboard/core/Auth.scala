@@ -14,9 +14,11 @@ trait Auth[F[_]]:
   def signUp(newUserInfo: NewUserInfo): F[Option[User]]
   def changePassword(email: String, newPasswordInfo: NewPasswordInfo): F[Either[String, Option[User]]]
   def delete(email: String): F[Boolean]
+  def sendPasswordRecoveryToken(email: String): F[Unit]
+  def recoverPasswordFromToken(email: String, token: String, newPassword: String): F[Boolean]
 
 
-class LiveAuth[F[_]: Sync: Logger] private (users: Users[F]) extends Auth[F]:
+class LiveAuth[F[_]: Sync: Logger] private (users: Users[F], tokens: Tokens[F], emails: Emails[F]) extends Auth[F]:
   override def login(email: String, password: String): F[Option[User]] =
     for
       maybeUser <- users.find(email)
@@ -46,11 +48,6 @@ class LiveAuth[F[_]: Sync: Logger] private (users: Users[F]) extends Auth[F]:
 
   override def changePassword(email: String, newPasswordInfo: NewPasswordInfo): F[Either[String, Option[User]]] =
 
-    def updateUser(user: User, newPassword: String): F[Option[User]] = for
-      newHashedPassword <- BCrypt.hashpw[F](newPasswordInfo.newPassword)
-      updatedUser       <- users.update(user.copy(hashedPassword = newHashedPassword))
-    yield updatedUser
-
     def checkAndUpdate(user: User, oldPassword: String, newPassword: String): F[Either[String, Option[User]]] = for
       passCheck <- BCrypt.checkpwBool[F](newPasswordInfo.oldPassword, PasswordHash[BCrypt](user.hashedPassword))
       updateResult <-
@@ -69,7 +66,27 @@ class LiveAuth[F[_]: Sync: Logger] private (users: Users[F]) extends Auth[F]:
   override def delete(email: String): F[Boolean] =
     users.delete(email)
 
+  override def sendPasswordRecoveryToken(email: String): F[Unit] =
+    tokens
+      .getToken(email)
+      .flatMap:
+        case Some(token) => emails.sendPasswordRecoveryEmail(email, token)
+        case None        => ().pure[F]
+
+  override def recoverPasswordFromToken(email: String, token: String, newPassword: String): F[Boolean] = for
+    maybeUser    <- users.find(email)
+    tokenIsValid <- tokens.checkToken(email, token)
+    result <- (maybeUser, tokenIsValid) match
+      case (Some(user), true) => updateUser(user, newPassword).map(_.nonEmpty)
+      case _                  => false.pure[F]
+  yield result
+
+  private def updateUser(user: User, newPassword: String): F[Option[User]] = for
+    newHashedPassword <- BCrypt.hashpw[F](newPassword)
+    updatedUser       <- users.update(user.copy(hashedPassword = newHashedPassword))
+  yield updatedUser
+
 
 object LiveAuth:
-  def apply[F[_]: Sync: Logger](users: Users[F]): F[LiveAuth[F]] =
-    new LiveAuth[F](users).pure[F]
+  def apply[F[_]: Sync: Logger](users: Users[F], tokens: Tokens[F], emails: Emails[F]): F[LiveAuth[F]] =
+    new LiveAuth[F](users, tokens, emails).pure[F]
