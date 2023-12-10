@@ -2,6 +2,7 @@ package dlakomy.jobsboard.http.routes
 
 import cats.effect.*
 import cats.effect.testing.scalatest.AsyncIOSpec
+import cats.implicits.*
 import dlakomy.jobsboard.core.*
 import dlakomy.jobsboard.domain.auth.*
 import dlakomy.jobsboard.domain.user.*
@@ -30,7 +31,9 @@ class AuthRoutesSpec
   ////////////////////////////////////////////////////////////
   // PREP
   ////////////////////////////////////////////////////////////
-  private val mockedAuth: Auth[IO] = new Auth[IO]:
+  private val mockedAuth: Auth[IO] = probedAuth(None)
+
+  private def probedAuth(userMap: Option[Ref[IO, Map[String, String]]]): Auth[IO] = new Auth[IO]:
     override def login(email: String, password: String): IO[Option[User]] =
       if (email == dawidEmail && password == dawidPassword)
         IO.pure(Some(dawid))
@@ -54,8 +57,21 @@ class AuthRoutesSpec
 
     override def delete(email: String): IO[Boolean] = IO.pure(true)
 
-    override def sendPasswordRecoveryToken(email: String): IO[Unit]                                       = ???
-    override def recoverPasswordFromToken(email: String, token: String, newPassword: String): IO[Boolean] = ???
+    override def sendPasswordRecoveryToken(email: String): IO[Unit] =
+      userMap
+        .traverse: userMapRef =>
+          userMapRef.modify: userMap =>
+            (userMap + (email -> "aqq123"), ())
+        .map(_ => ())
+
+    override def recoverPasswordFromToken(email: String, token: String, newPassword: String): IO[Boolean] =
+      userMap // functional programming is readable, they said...
+        .traverse: userMapRef =>
+          userMapRef.get
+            .map: userMap =>
+              userMap.get(email).filter(_ == token)
+            .map(_.nonEmpty)
+        .map(_.getOrElse(false))
 
   given logger: Logger[IO] = Slf4jLogger.getLogger[IO]
   // this is what we are testing
@@ -159,5 +175,41 @@ class AuthRoutesSpec
             .withBearerToken(jwtToken)
         )
       yield response.status shouldBe Status.Ok
+
+    "should return 200 when resetting a password and an email should be triggered" in:
+      for
+        userMapRef <- Ref.of[IO, Map[String, String]](Map.empty)
+        auth       <- IO.pure(probedAuth(Some(userMapRef)))
+        routes     <- IO(AuthRoutes(auth, mockedAuthenticator).routes)
+        response <- routes.orNotFound.run(
+          Request(method = Method.POST, uri = uri"/auth/reset")
+            .withEntity(ForgotPasswordInfo(dawidEmail))
+        )
+        userMap <- userMapRef.get
+      yield
+        response.status shouldBe Status.Ok
+        userMap should contain key dawidEmail
+
+    "should return 200 when recovering a password with valid user+token" in:
+      for
+        userMapRef <- Ref.of[IO, Map[String, String]](Map(dawidEmail -> "aqq123"))
+        auth       <- IO.pure(probedAuth(Some(userMapRef)))
+        routes     <- IO(AuthRoutes(auth, mockedAuthenticator).routes)
+        response <- routes.orNotFound.run(
+          Request(method = Method.POST, uri = uri"/auth/recover")
+            .withEntity(RecoverPasswordInfo(dawidEmail, "aqq123", "newpass"))
+        )
+      yield response.status shouldBe Status.Ok
+
+    "should return 403 when recovering a password with invalid token or no token" in:
+      for
+        userMapRef <- Ref.of[IO, Map[String, String]](Map(dawidEmail -> "aqq123"))
+        auth       <- IO.pure(probedAuth(Some(userMapRef)))
+        routes     <- IO(AuthRoutes(auth, mockedAuthenticator).routes)
+        response <- routes.orNotFound.run(
+          Request(method = Method.POST, uri = uri"/auth/recover")
+            .withEntity(RecoverPasswordInfo(dawidEmail, "wrong", "newpass"))
+        )
+      yield response.status shouldBe Status.Forbidden
 
   }
