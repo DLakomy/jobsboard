@@ -30,3 +30,8 @@ metals.sbt
 .idea
 .idea_modules
 /.worksheet/
+
+# npm and its friends
+node_modules/
+.parcel-cache/
+dist/

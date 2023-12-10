@@ -1,6 +1,7 @@
 scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature", "-Xfatal-warnings", "-Wunused:all")
 
-val scala3Version = "3.3.1"
+val scala3Version  = "3.3.1"
+val myOrganization = "Dawid Łakomy"
 
 val circeVersion               = "0.14.1"
 val catsEffectVersion          = "3.5.2"
@@ -16,16 +17,51 @@ val logbackVersion             = "1.4.11"
 val slf4jVersion               = "2.0.9"
 val javaMailVersion            = "1.6.2"
 
-// cats complained
-Compile / run / fork := true
-run / connectInput   := true
-
-lazy val root = project
-  .in(file("."))
+lazy val common = (crossProject(JSPlatform, JVMPlatform) in file("common"))
   .settings(
-    name         := "jobsboard",
-    version      := "0.1.0-SNAPSHOT",
+    name         := "common",
     scalaVersion := scala3Version,
+    organization := myOrganization
+  )
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Frontend
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// could be updated, but I'm not good with frontend, so
+// I prefer the versions that Daniel used in the course
+val tyrianVersion = "0.6.1"
+val fs2DomVersion = "0.1.0"
+val laikaVersion  = "0.19.0"
+
+lazy val app = (project in file("app"))
+  .enablePlugins(ScalaJSPlugin)
+  .settings(
+    name         := "app",
+    scalaVersion := scala3Version,
+    organization := myOrganization,
+    libraryDependencies ++= Seq(
+      "io.indigoengine" %%% "tyrian-io"     % tyrianVersion,
+      "com.armanbilge"  %%% "fs2-dom"       % fs2DomVersion,
+      "org.planet42"    %%% "laika-core"    % laikaVersion,
+      "io.circe"        %%% "circe-core"    % circeVersion,
+      "io.circe"        %%% "circe-parser"  % circeVersion,
+      "io.circe"        %%% "circe-generic" % circeVersion
+    ),
+    scalaJSLinkerConfig ~= { _.withModuleKind(ModuleKind.CommonJSModule) },
+    semanticdbEnabled := true,
+    autoAPIMappings   := true
+  )
+  .dependsOn(common.js)
+
+
+lazy val server = project
+  .in(file("server"))
+  .settings(
+    name         := "server",
+    scalaVersion := scala3Version,
+    organization := myOrganization,
     libraryDependencies ++= Seq(
       "org.typelevel"         %% "cats-effect"                   % catsEffectVersion,
       "org.http4s"            %% "http4s-dsl"                    % http4sVersion,
@@ -49,5 +85,8 @@ lazy val root = project
       "org.testcontainers"     % "postgresql"                    % testContainerVersion       % Test,
       "ch.qos.logback"         % "logback-classic"               % logbackVersion             % Test
     ),
-    Compile / mainClass := Some("dlakomy.jobsboard.Application")
+    Compile / mainClass  := Some("dlakomy.jobsboard.Application"),
+    Compile / run / fork := true, // cats complained
+    run / connectInput   := true
   )
+  .dependsOn(common.jvm)
