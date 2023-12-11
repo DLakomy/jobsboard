@@ -26,7 +26,6 @@ class LiveTokens[F[_]: MonadCancelThrow: Logger] private (users: Users[F])(xa: T
         case Some(_) => getFreshToken(email).map(Some(_))
 
   override def checkToken(email: String, token: String): F[Boolean] =
-    // IMO getting time should be suspended (no a pure thing)
     sql"""
       SELECT 1
         FROM recoverytokens
@@ -48,7 +47,7 @@ class LiveTokens[F[_]: MonadCancelThrow: Logger] private (users: Users[F])(xa: T
 
   private def getFreshToken(email: String): F[String] =
     findToken(email).flatMap:
-      // I could use ON CONFLICT clause, but prefered
+      // I could use ON CONFLICT clause, but preferred
       // not to use vendor specific syntax
       case None    => generateToken(email)
       case Some(_) => updateToken(email)
