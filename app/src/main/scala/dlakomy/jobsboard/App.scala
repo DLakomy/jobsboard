@@ -1,6 +1,7 @@
 package dlakomy.jobsboard
 
 import cats.effect.IO
+import dlakomy.jobsboard.components.*
 import org.scalajs.dom.window
 import tyrian.Html.*
 import tyrian.*
@@ -39,20 +40,6 @@ class App extends TyrianApp[App.Msg, App.Model]:
 
   override def view(model: Model): Html[Msg] =
     div(
-      renderNavLink("Jobs", "/jobs"),
-      renderNavLink("Login", "/login"),
-      renderNavLink("Sign up", "/signup"),
+      Header.view(),
       div(s"You are now at: ${model.router.location}")
     )
-
-  private def renderNavLink(text: String, location: String) =
-    a(
-      href    := location,
-      `class` := "nav-link",
-      onEvent(
-        "click",
-        e =>
-          e.preventDefault()
-          Router.ChangeLocation(location)
-      )
-    )(text)
