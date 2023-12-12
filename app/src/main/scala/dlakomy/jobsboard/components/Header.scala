@@ -2,8 +2,10 @@ package dlakomy.jobsboard.components
 
 import cats.effect.IO
 import dlakomy.jobsboard.core.*
+import dlakomy.jobsboard.pages.*
 import tyrian.Html.*
 import tyrian.*
+
 import scala.scalajs.js
 import scala.scalajs.js.annotation.*
 
@@ -15,9 +17,9 @@ object Header:
       renderLogo(),
       div(`class` := "header-nav")(
         ul(`class` := "header-links")(
-          renderNavLink("Jobs", "/jobs"),
-          renderNavLink("Login", "/login"),
-          renderNavLink("Sign up", "/signup")
+          renderNavLink("Jobs", Page.Urls.JOBS),
+          renderNavLink("Login", Page.Urls.LOGIN),
+          renderNavLink("Sign up", Page.Urls.SIGNUP)
         )
       )
     )
@@ -29,12 +31,12 @@ object Header:
 
   private def renderLogo() =
     a(
-      href := "/",
+      href := Page.Urls.HOME,
       onEvent(
         "click",
         e =>
           e.preventDefault()
-          Router.ChangeLocation("/")
+          Router.ChangeLocation(Page.Urls.HOME)
       )
     )(
       img(
