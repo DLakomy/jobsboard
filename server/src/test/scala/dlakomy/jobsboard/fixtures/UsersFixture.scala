@@ -1,5 +1,6 @@
 package dlakomy.jobsboard.fixtures
 
+import dlakomy.jobsboard.domain.auth.*
 import dlakomy.jobsboard.domain.user.*
 import dlakomy.jobsboard.core.Users
 import cats.effect.IO

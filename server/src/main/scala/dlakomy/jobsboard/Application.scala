@@ -6,6 +6,7 @@ import dlakomy.jobsboard.config.*
 import dlakomy.jobsboard.config.syntax.*
 import dlakomy.jobsboard.modules.*
 import org.http4s.ember.server.EmberServerBuilder
+import org.http4s.server.middleware.CORS
 import org.typelevel.log4cats.Logger
 import org.typelevel.log4cats.slf4j.Slf4jLogger
 import pureconfig.ConfigSource
@@ -29,7 +30,7 @@ object Application extends IOApp.Simple:
                 .default[IO]
                 .withHost(emberConfig.host)
                 .withPort(emberConfig.port)
-                .withHttpApp(httpApi.endpoints.orNotFound)
+                .withHttpApp(CORS(httpApi.endpoints).orNotFound) // FIXME configure CORS properly
                 .build
           yield server
 

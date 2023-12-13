@@ -8,7 +8,7 @@ object Page:
   trait Msg
 
   enum StatusKind:
-    case Success, ERROR, LOADING
+    case SUCCESS, ERROR, LOADING
 
   final case class Status(message: String, kind: StatusKind)
 

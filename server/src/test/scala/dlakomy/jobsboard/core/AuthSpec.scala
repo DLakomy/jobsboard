@@ -2,7 +2,7 @@ package dlakomy.jobsboard.core
 
 import cats.effect.*
 import cats.effect.testing.scalatest.AsyncIOSpec
-import dlakomy.jobsboard.domain.auth.NewPasswordInfo
+import dlakomy.jobsboard.domain.auth.*
 import dlakomy.jobsboard.domain.user.*
 import dlakomy.jobsboard.fixtures.*
 import org.scalatest.freespec.AsyncFreeSpec
