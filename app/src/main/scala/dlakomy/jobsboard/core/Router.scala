@@ -5,7 +5,7 @@ import fs2.dom.History
 import tyrian.*
 
 
-final case class Router(location: String, history: History[IO, String]):
+final case class Router private (location: String, history: History[IO, String]):
   import Router.*
 
   def update(msg: Msg): (Router, Cmd[IO, Msg]) = msg match

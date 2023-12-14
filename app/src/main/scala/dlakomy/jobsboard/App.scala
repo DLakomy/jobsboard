@@ -13,9 +13,9 @@ import core.*
 
 
 object App:
-  type Msg = Router.Msg | Page.Msg
+  type Msg = Router.Msg | Session.Msg | Page.Msg
 
-  case class Model(router: Router, page: Page)
+  case class Model(router: Router, session: Session, page: Page)
 
 
 @JSExportTopLevel("JobsboardApp")
@@ -27,7 +27,9 @@ class App extends TyrianApp[App.Msg, App.Model]:
     val page                = Page.get(location)
     val pageCmd             = page.initCmd
     val (router, routerCmd) = Router.startAt(location)
-    (Model(router, page), routerCmd |+| pageCmd)
+    val session             = Session()
+    val sessionCmd          = session.initCmd
+    (Model(router, session, page), routerCmd |+| sessionCmd |+| pageCmd)
 
   override def subscriptions(model: Model): Sub[IO, Msg] =
     Sub.make( // listener for browser history changes (like back btn)
@@ -46,6 +48,9 @@ class App extends TyrianApp[App.Msg, App.Model]:
         val newPage    = Page.get(newRouter.location)
         val newPageCmd = newPage.initCmd
         (model.copy(router = newRouter, page = newPage), routerCmd |+| newPageCmd)
+    case msg: Session.Msg =>
+      val (newSession, cmd) = model.session.update(msg)
+      (model.copy(session = newSession), cmd)
     case msg: Page.Msg =>
       val (newPage, cmd) = model.page.update(msg)
       (model.copy(page = newPage), cmd)

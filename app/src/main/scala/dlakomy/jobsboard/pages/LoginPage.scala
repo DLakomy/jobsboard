@@ -9,8 +9,9 @@ import io.circe.parser.*
 import io.circe.syntax.*
 import tyrian.Html.*
 import tyrian.*
-import tyrian.cmds.Logger
 import tyrian.http.*
+import dlakomy.jobsboard.core.*
+import dlakomy.jobsboard.App
 
 
 final case class LoginPage(email: String = "", password: String = "", status: Option[Page.Status] = None) extends Page:
@@ -19,7 +20,7 @@ final case class LoginPage(email: String = "", password: String = "", status: Op
   def initCmd: Cmd[IO, Page.Msg] =
     Cmd.None
 
-  def update(msg: Page.Msg): (Page, Cmd[IO, Page.Msg]) = msg match
+  def update(msg: Page.Msg): (Page, Cmd[IO, App.Msg]) = msg match
     case UpdateEmail(e)    => (this.copy(email = e), Cmd.None)
     case UpdatePassword(p) => (this.copy(password = p), Cmd.None)
     case AttemptLogin =>
@@ -40,7 +41,7 @@ final case class LoginPage(email: String = "", password: String = "", status: Op
     case LoginError(error) =>
       (setErrorStatus(error), Cmd.None)
     case LoginSuccess(token) =>
-      (setSuccessStatus("Success!"), Logger.consoleLog(s"I've got my token: $token"))
+      (setSuccessStatus("Success!"), Cmd.Emit(Session.SetToken(email, token)))
     case _ => (this, Cmd.None)
 
   def view(): Html[Page.Msg] =

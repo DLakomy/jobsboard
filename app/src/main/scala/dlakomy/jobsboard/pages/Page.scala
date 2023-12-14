@@ -1,6 +1,7 @@
 package dlakomy.jobsboard.pages
 
 import cats.effect.IO
+import dlakomy.jobsboard.App
 import tyrian.*
 
 
@@ -35,5 +36,5 @@ object Page:
 
 abstract class Page:
   def initCmd: Cmd[IO, Page.Msg]
-  def update(msg: Page.Msg): (Page, Cmd[IO, Page.Msg])
+  def update(msg: Page.Msg): (Page, Cmd[IO, App.Msg])
   def view(): Html[Page.Msg]
