@@ -41,7 +41,7 @@ final case class LoginPage(email: String = "", password: String = "", status: Op
     case LoginError(error) =>
       (setErrorStatus(error), Cmd.None)
     case LoginSuccess(token) =>
-      (setSuccessStatus("Success!"), Cmd.Emit(Session.SetToken(email, token)))
+      (setSuccessStatus("Success!"), Cmd.Emit(Session.SetToken(email, token, true)))
     case _ => (this, Cmd.None)
 
   def view(): Html[Page.Msg] =
