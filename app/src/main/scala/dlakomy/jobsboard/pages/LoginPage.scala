@@ -1,8 +1,10 @@
 package dlakomy.jobsboard.pages
 
 import cats.effect.IO
+import dlakomy.jobsboard.App
 import dlakomy.jobsboard.common.Constants
 import dlakomy.jobsboard.common.*
+import dlakomy.jobsboard.core.*
 import dlakomy.jobsboard.domain.auth.LoginInfo
 import io.circe.generic.auto.*
 import io.circe.parser.*
@@ -10,8 +12,6 @@ import io.circe.syntax.*
 import tyrian.Html.*
 import tyrian.*
 import tyrian.http.*
-import dlakomy.jobsboard.core.*
-import dlakomy.jobsboard.App
 
 
 final case class LoginPage(email: String = "", password: String = "", status: Option[Page.Status] = None) extends Page:
@@ -47,10 +47,10 @@ final case class LoginPage(email: String = "", password: String = "", status: Op
   def view(): Html[Page.Msg] =
     div(`class` := "form-section")(
       div(`class` := "top-section")(
-        h1("Sign up")
+        h1("Log in")
       ),
       form(
-        name    := "signin",
+        name    := "login",
         `class` := "form",
         onEvent(
           "submit",

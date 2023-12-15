@@ -1,6 +1,7 @@
 package dlakomy.jobsboard.components
 
 import cats.effect.IO
+import dlakomy.jobsboard.App
 import dlakomy.jobsboard.core.*
 import dlakomy.jobsboard.pages.*
 import tyrian.Html.*
@@ -17,9 +18,7 @@ object Header:
       renderLogo(),
       div(`class` := "header-nav")(
         ul(`class` := "header-links")(
-          renderNavLink("Jobs", Page.Urls.JOBS),
-          renderNavLink("Login", Page.Urls.LOGIN),
-          renderNavLink("Sign up", Page.Urls.SIGNUP)
+          renderNavLinks()
         )
       )
     )
@@ -46,7 +45,27 @@ object Header:
       )
     )
 
-  private def renderNavLink(text: String, location: String) =
+  private def renderNavLinks(): List[Html[App.Msg]] =
+    val constantLinks = List(renderSimpleNavLink("Jobs", Page.Urls.JOBS))
+
+    val unauthedLinks = List(
+      renderSimpleNavLink("Login", Page.Urls.LOGIN),
+      renderSimpleNavLink("Sign up", Page.Urls.SIGNUP)
+    )
+
+    val authedLinks = List(
+      renderNavLink("Log out", Page.Urls.HASH)(_ => Session.LogOut)
+    )
+
+    constantLinks ++ (
+      if (Session.isActive) authedLinks
+      else unauthedLinks
+    )
+
+  private def renderSimpleNavLink(text: String, location: String) =
+    renderNavLink(text, location)(Router.ChangeLocation(_))
+
+  private def renderNavLink(text: String, location: String)(location2msg: String => App.Msg) =
     li(`class` := "nav-item")(
       a(
         href    := location,
@@ -55,7 +74,7 @@ object Header:
           "click",
           e =>
             e.preventDefault()
-            Router.ChangeLocation(location)
+            location2msg(location)
         )
       )(text)
     )
