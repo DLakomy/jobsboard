@@ -10,6 +10,7 @@ import tyrian.*
 import tyrian.http.HttpError
 import tyrian.http.Method
 import tyrian.http.Response
+import dlakomy.jobsboard.core.Router
 
 
 final case class ForgotPasswordPage(email: String = "", status: Option[Page.Status] = None)
@@ -31,10 +32,11 @@ final case class ForgotPasswordPage(email: String = "", status: Option[Page.Stat
       (setErrorStatus(error), Cmd.None)
     case _ => (this, Cmd.None)
 
-  override protected def renderFormContent(): List[Html[Page.Msg]] =
+  override protected def renderFormContent(): List[Html[Page.Msg | Router.Msg]] =
     List(
       renderInput("Email", "email", "text", true, UpdateEmail(_)),
-      button(`type` := "button", onClick(AttemptResetPassword))("Send email")
+      button(`type` := "button", onClick(AttemptResetPassword))("Send email"),
+      renderAuxLink(Page.Urls.RESET_PASSWORD, "Have a token?")
     )
 
   //////////////////////////////////////////

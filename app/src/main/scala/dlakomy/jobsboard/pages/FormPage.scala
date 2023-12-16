@@ -3,8 +3,11 @@ package dlakomy.jobsboard.pages
 import cats.effect.IO
 import dlakomy.jobsboard.core.*
 import dlakomy.jobsboard.pages.Page.Msg
+import org.scalajs.dom.*
 import tyrian.Html.*
 import tyrian.*
+
+import scala.concurrent.duration.{span as _, *}
 
 
 abstract class FormPage(title: String, status: Option[Page.Status]) extends Page:
@@ -12,7 +15,8 @@ abstract class FormPage(title: String, status: Option[Page.Status]) extends Page
   protected def renderFormContent(): List[Html[Page.Msg | Router.Msg]]
 
   // public API
-  override def initCmd: Cmd[IO, Msg] = Cmd.None
+  override def initCmd: Cmd[IO, Msg] =
+    clearForm()
 
   final override def view(): Html[Page.Msg | Router.Msg] = renderForm()
 
@@ -25,6 +29,7 @@ abstract class FormPage(title: String, status: Option[Page.Status]) extends Page
       form(
         name    := title.toLowerCase.replace(' ', '_'),
         `class` := "form",
+        id      := formId,
         onEvent(
           "submit",
           e =>
@@ -63,3 +68,20 @@ abstract class FormPage(title: String, status: Option[Page.Status]) extends Page
           Router.ChangeLocation(location)
       )
     )(text)
+
+  private val formId = "form"
+  private def clearForm() =
+    // needed cuz the browser kept inserting email and
+    // the model didn't know about it
+    // possible better solution: use uncontrolled inputs
+    // (dunno if possible in Tyrian)
+    Cmd.Run[IO, Unit, Page.Msg] {
+      def effect: IO[Option[HTMLFormElement]] = for
+        maybeForm <- IO(Option(document.getElementById(formId).asInstanceOf[HTMLFormElement]))
+        finalForm <-
+          if (maybeForm.isEmpty) IO.sleep(100.millis) *> effect
+          else IO(maybeForm)
+      yield finalForm
+
+      effect.map(_.foreach(_.reset()))
+    }(_ => Page.NoOp)

@@ -2,8 +2,8 @@ package dlakomy.jobsboard.pages
 
 import cats.effect.IO
 import dlakomy.jobsboard.App
-import tyrian.*
 import dlakomy.jobsboard.core.Router
+import tyrian.*
 
 
 object Page:
@@ -16,14 +16,14 @@ object Page:
   final case class Status(message: String, kind: StatusKind)
 
   object Urls:
-    val LOGIN            = "/login"
-    val SIGNUP           = "/signup"
-    val FORGOT_PASSWORD  = "/forgotpassword"
-    val RECOVER_PASSWORD = "/recoverpassword"
-    val JOBS             = "/jobs"
-    val EMPTY            = ""
-    val HOME             = "/"
-    val HASH             = "#"
+    val LOGIN           = "/login"
+    val SIGNUP          = "/signup"
+    val FORGOT_PASSWORD = "/forgotpassword"
+    val RESET_PASSWORD  = "/resetpassword"
+    val JOBS            = "/jobs"
+    val EMPTY           = ""
+    val HOME            = "/"
+    val HASH            = "#"
 
   def get(location: String) =
     import Urls.*
@@ -31,7 +31,7 @@ object Page:
       case LOGIN               => LoginPage()
       case SIGNUP              => SignUpPage()
       case FORGOT_PASSWORD     => ForgotPasswordPage()
-      case RECOVER_PASSWORD    => RecoverPasswordPage()
+      case RESET_PASSWORD      => ResetPasswordPage()
       case EMPTY | HOME | JOBS => JobListPage()
       case s"/jobs/$id"        => JobPage(id)
       case _                   => NotFoundPage()
