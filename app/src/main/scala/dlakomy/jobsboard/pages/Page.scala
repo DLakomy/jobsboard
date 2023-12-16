@@ -3,10 +3,12 @@ package dlakomy.jobsboard.pages
 import cats.effect.IO
 import dlakomy.jobsboard.App
 import tyrian.*
+import dlakomy.jobsboard.core.Router
 
 
 object Page:
   trait Msg
+  case object NoOp extends Msg
 
   enum StatusKind:
     case SUCCESS, ERROR, LOADING
@@ -17,7 +19,7 @@ object Page:
     val LOGIN            = "/login"
     val SIGNUP           = "/signup"
     val FORGOT_PASSWORD  = "/forgotpassword"
-    val RECOVER_PASSWORD = "recoverpassword"
+    val RECOVER_PASSWORD = "/recoverpassword"
     val JOBS             = "/jobs"
     val EMPTY            = ""
     val HOME             = "/"
@@ -38,4 +40,4 @@ object Page:
 abstract class Page:
   def initCmd: Cmd[IO, Page.Msg]
   def update(msg: Page.Msg): (Page, Cmd[IO, App.Msg])
-  def view(): Html[Page.Msg]
+  def view(): Html[Page.Msg | Router.Msg]
