@@ -6,7 +6,6 @@ import cats.data.*
 import cats.implicits.*
 import dlakomy.jobsboard.domain.auth.*
 import dlakomy.jobsboard.domain.job.*
-import dlakomy.jobsboard.domain.user.*
 
 import java.net.URL
 import scala.util.Failure

@@ -1,6 +1,5 @@
 package dlakomy.jobsboard.components
 
-import cats.effect.IO
 import dlakomy.jobsboard.App
 import dlakomy.jobsboard.core.*
 import dlakomy.jobsboard.pages.*

@@ -7,8 +7,6 @@ import dlakomy.jobsboard.common.*
 import dlakomy.jobsboard.core.*
 import dlakomy.jobsboard.domain.auth.LoginInfo
 import io.circe.generic.auto.*
-import io.circe.parser.*
-import io.circe.syntax.*
 import tyrian.Html.*
 import tyrian.*
 import tyrian.http.*

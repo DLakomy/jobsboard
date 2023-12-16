@@ -1,4 +1,6 @@
-scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature", "-Xfatal-warnings", "-Wunused:all")
+// ThisBuild / scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature", "-Xfatal-warnings", "-Wunused:all")
+// FIXME after proper CORS config (skipped -Xfatal-warnings)
+ThisBuild / scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature", "-Wunused:all")
 
 val scala3Version  = "3.3.1"
 val myOrganization = "Dawid Łakomy"

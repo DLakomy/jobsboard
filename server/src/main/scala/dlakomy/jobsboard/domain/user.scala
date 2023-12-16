@@ -2,8 +2,6 @@ package dlakomy.jobsboard.domain
 
 import dlakomy.jobsboard.domain.job.*
 import doobie.*
-import doobie.postgres.*
-import doobie.postgres.implicits.*
 import doobie.util.*
 import tsec.authorization.AuthGroup
 import tsec.authorization.SimpleAuthEnum
