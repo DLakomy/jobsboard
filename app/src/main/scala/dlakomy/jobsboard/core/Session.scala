@@ -21,8 +21,6 @@ final case class Session(email: Option[String] = None, token: Option[String] = N
         else Commands.checkToken()
 
       (this.copy(email = Some(e), token = Some(t)), cookieCmd |+| routingCmd)
-    case KeepToken =>
-      (this, Cmd.None)
     case LogOut =>
       val cmd = token.map(_ => Commands.logout()).getOrElse(Cmd.None)
       (this, cmd)
@@ -32,6 +30,8 @@ final case class Session(email: Option[String] = None, token: Option[String] = N
         Commands.clearAllSessionCookies() |+|
           Cmd.Emit(Router.ChangeLocation(Page.Urls.HOME))
       )
+    case NoOp =>
+      (this, Cmd.None)
 
   def initCmd: Cmd[IO, Msg] =
     val maybeCommand = for
@@ -46,9 +46,9 @@ final case class Session(email: Option[String] = None, token: Option[String] = N
 
 object Session:
   trait Msg
+  case object NoOp extends Msg
   // token actions
   case class SetToken(email: String, token: String, isNewLogin: Boolean) extends Msg
-  case object KeepToken                                                  extends Msg
   case object InvalidateToken                                            extends Msg
   // loguout actions
   case object LogOut        extends Msg
@@ -71,7 +71,7 @@ object Session:
       val method   = Method.Get
       val onSuccess: Response => Msg = response =>
         response.status match
-          case Status(200, _) => KeepToken
+          case Status(200, _) => NoOp
           case _              => InvalidateToken
       val onError: HttpError => Msg =
         _ => InvalidateToken
