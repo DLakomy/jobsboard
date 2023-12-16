@@ -96,7 +96,7 @@ object LoginPage:
 
   object Endpoints:
     val login = new Endpoint[Msg]:
-      override val location = Constants.Endpoints.login
+      override val location = Constants.endpoints.login
       override val method   = Method.Post
       override val onSuccess: Response => Msg = response =>
         val maybeToken = response.headers.get("authorization")

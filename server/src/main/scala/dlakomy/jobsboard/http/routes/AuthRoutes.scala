@@ -95,11 +95,18 @@ class AuthRoutes[F[_]: Concurrent: Logger: SecuredHandler] private (
           case true  => Ok()
           case false => NotFound()
 
-  private val unauthedRoutes = loginRoute <+> createUserRoute <+> forgotPasswordRoute <+> recoverPasswordRoute
+  private val checkTokenRoute: AuthRoute[F] =
+    case GET -> Root / "checkToken" asAuthed _ =>
+      Ok()
+
+  private val unauthedRoutes =
+    loginRoute <+> createUserRoute <+> forgotPasswordRoute <+> recoverPasswordRoute
+
   private val authedRoutes = SecuredHandler[F].liftService(
     changePasswordRoute.restrictedTo(allRoles) |+|
       logoutRoute.restrictedTo(allRoles) |+|
-      deleteUserRoute.restrictedTo(adminOnly)
+      deleteUserRoute.restrictedTo(adminOnly) |+|
+      checkTokenRoute.restrictedTo(allRoles)
   )
 
   val routes = Router(
