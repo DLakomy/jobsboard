@@ -3,6 +3,7 @@ package dlakomy.jobsboard.pages
 import cats.effect.IO
 import dlakomy.jobsboard.core.*
 import dlakomy.jobsboard.pages.Page.Msg
+import org.scalajs.dom.HTMLInputElement
 import org.scalajs.dom.*
 import tyrian.Html.*
 import tyrian.*
@@ -77,6 +78,35 @@ abstract class FormPage(title: String, status: Option[Page.Status]) extends Page
           Router.ChangeLocation(location)
       )
     )(text)
+
+  final protected def renderImageUploadInput(
+      name: String,
+      uid: String,
+      imgSrc: Option[String],
+      onChange: Option[File] => Msg
+  ): Html[Msg] =
+    div(`class` := "form-input")(
+      input(
+        `type`  := "file",
+        `class` := "form-control",
+        id      := uid,
+        accept  := "image/*",
+        onEvent(
+          "change",
+          e =>
+            val imageInput = e.target.asInstanceOf[HTMLInputElement]
+            val fileList   = imageInput.files
+            onChange(fileList.headOption)
+        )
+      ),
+      img(
+        id     := "preview",
+        src    := imgSrc.getOrElse(""),
+        alt    := "Preview",
+        width  := "180",
+        height := "180"
+      )
+    )
 
   private val formId = "form"
   private def clearForm() =
