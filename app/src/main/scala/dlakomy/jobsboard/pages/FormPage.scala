@@ -18,7 +18,7 @@ abstract class FormPage(title: String, status: Option[Page.Status]) extends Page
   override def initCmd: Cmd[IO, Msg] =
     clearForm()
 
-  final override def view(): Html[Page.Msg | Router.Msg] = renderForm()
+  override def view(): Html[Page.Msg | Router.Msg] = renderForm()
 
   // protected API
   final protected def renderForm(): Html[Page.Msg | Router.Msg] =

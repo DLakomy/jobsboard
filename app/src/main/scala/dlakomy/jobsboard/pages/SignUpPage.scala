@@ -103,6 +103,7 @@ object SignUpPage:
             parsed match
               case Left(e)  => SignUpError(s"Error: ${e.getMessage}")
               case Right(e) => SignUpError(e)
+          case _ => SignUpError("Unknown reply from the server.")
 
       override val onError: HttpError => Msg =
         e => SignUpError(e.toString)

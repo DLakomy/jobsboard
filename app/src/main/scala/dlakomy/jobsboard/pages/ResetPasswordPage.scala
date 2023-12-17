@@ -47,7 +47,7 @@ final case class ResetPasswordPage(
     renderInput("Token", "token", "text", true, UpdateToken(_)),
     renderInput("Password", "password", "password", true, UpdatePassword(_)),
     button(`type` := "button", onClick(AttemptResetPassword))("Set password"),
-    renderAuxLink(Page.Urls.FORGOT_PASSWORD, "Don't have a token yet?")
+    renderAuxLink(Page.urls.FORGOT_PASSWORD, "Don't have a token yet?")
   )
 
   //////////////////////////////////////////
@@ -83,6 +83,7 @@ object ResetPasswordPage:
             parsed match
               case Left(e)                => ResetPasswordFailure(s"Response error: ${e.getMessage}")
               case Right(errorFromServer) => ResetPasswordFailure(errorFromServer)
+          case _ => ResetPasswordFailure("Unknown reply from the server.")
 
   object Commands:
     def resetPassword(email: String, token: String, password: String): Cmd[IO, Msg] =

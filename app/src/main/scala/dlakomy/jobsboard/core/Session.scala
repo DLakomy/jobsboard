@@ -17,7 +17,7 @@ final case class Session(email: Option[String] = None, token: Option[String] = N
     case SetToken(e, t, isNewLogin) =>
       val cookieCmd = Commands.setAllSessionCookies(e, t, isNewLogin)
       val routingCmd =
-        if (isNewLogin) Cmd.Emit(Router.ChangeLocation(Page.Urls.HOME))
+        if (isNewLogin) Cmd.Emit(Router.ChangeLocation(Page.urls.HOME))
         else Commands.checkToken()
 
       (this.copy(email = Some(e), token = Some(t)), cookieCmd |+| routingCmd)
@@ -28,7 +28,7 @@ final case class Session(email: Option[String] = None, token: Option[String] = N
       (
         this.copy(email = None, token = None),
         Commands.clearAllSessionCookies() |+|
-          Cmd.Emit(Router.ChangeLocation(Page.Urls.HOME))
+          Cmd.Emit(Router.ChangeLocation(Page.urls.HOME))
       )
     case NoOp =>
       (this, Cmd.None)

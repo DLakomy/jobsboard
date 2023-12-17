@@ -45,7 +45,7 @@ final case class LoginPage(email: String = "", password: String = "", status: Op
       renderInput("Email", "email", "text", true, UpdateEmail(_)),
       renderInput("Password", "password", "password", true, UpdatePassword(_)),
       button(`type` := "button", onClick(AttemptLogin))("Sign up"),
-      renderAuxLink(Page.Urls.FORGOT_PASSWORD, "Forgot password?")
+      renderAuxLink(Page.urls.FORGOT_PASSWORD, "Forgot password?")
     )
   //////////////////////////////////////////
   // private

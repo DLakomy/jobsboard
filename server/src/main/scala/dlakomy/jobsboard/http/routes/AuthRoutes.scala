@@ -56,7 +56,7 @@ class AuthRoutes[F[_]: Concurrent: Logger: SecuredHandler] private (
           resp <- maybeUserOrError match
             case Right(Some(_)) => Ok()
             case Right(None)    => NotFound(FailureResponse(s"User ${user.email} not found"))
-            case Left(_)        => Forbidden()
+            case Left(e)        => Forbidden(FailureResponse(e))
         yield resp
 
   // POST /auth/reset { ForgotPasswordInfo }

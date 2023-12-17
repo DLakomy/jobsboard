@@ -15,7 +15,7 @@ object Page:
 
   final case class Status(message: String, kind: StatusKind)
 
-  object Urls:
+  object urls:
     val LOGIN           = "/login"
     val SIGNUP          = "/signup"
     val FORGOT_PASSWORD = "/forgotpassword"
@@ -24,9 +24,10 @@ object Page:
     val EMPTY           = ""
     val HOME            = "/"
     val HASH            = "#"
+    val PROFILE         = "/profile"
 
   def get(location: String) =
-    import Urls.*
+    import urls.*
     location match
       case LOGIN               => LoginPage()
       case SIGNUP              => SignUpPage()
@@ -34,6 +35,7 @@ object Page:
       case RESET_PASSWORD      => ResetPasswordPage()
       case EMPTY | HOME | JOBS => JobListPage()
       case s"/jobs/$id"        => JobPage(id)
+      case PROFILE             => ProfilePage()
       case _                   => NotFoundPage()
 
 

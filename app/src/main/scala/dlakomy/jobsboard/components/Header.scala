@@ -29,12 +29,12 @@ object Header:
 
   private def renderLogo() =
     a(
-      href := Page.Urls.HOME,
+      href := Page.urls.HOME,
       onEvent(
         "click",
         e =>
           e.preventDefault()
-          Router.ChangeLocation(Page.Urls.HOME)
+          Router.ChangeLocation(Page.urls.HOME)
       )
     )(
       img(
@@ -45,15 +45,16 @@ object Header:
     )
 
   private def renderNavLinks(): List[Html[App.Msg]] =
-    val constantLinks = List(renderSimpleNavLink("Jobs", Page.Urls.JOBS))
+    val constantLinks = List(renderSimpleNavLink("Jobs", Page.urls.JOBS))
 
     val unauthedLinks = List(
-      renderSimpleNavLink("Login", Page.Urls.LOGIN),
-      renderSimpleNavLink("Sign up", Page.Urls.SIGNUP)
+      renderSimpleNavLink("Login", Page.urls.LOGIN),
+      renderSimpleNavLink("Sign up", Page.urls.SIGNUP)
     )
 
     val authedLinks = List(
-      renderNavLink("Log out", Page.Urls.HASH)(_ => Session.LogOut)
+      renderSimpleNavLink("Profile", Page.urls.PROFILE),
+      renderNavLink("Log out", Page.urls.HASH)(_ => Session.LogOut)
     )
 
     constantLinks ++ (
