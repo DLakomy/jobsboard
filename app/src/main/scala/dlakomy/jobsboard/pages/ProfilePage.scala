@@ -11,7 +11,7 @@ import tyrian.*
 import tyrian.http.*
 
 
-// TODO in the future allow company change and other things
+// in the future we could allow company change and other things
 final case class ProfilePage(oldPassword: String = "", newPassword: String = "", status: Option[Page.Status] = None)
     extends FormPage("Profile", status):
 

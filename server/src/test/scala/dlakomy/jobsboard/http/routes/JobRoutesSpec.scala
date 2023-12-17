@@ -138,7 +138,7 @@ class JobRoutesSpec
       for
         jwtToken <- mockedAuthenticator.create(
           johnEmail
-        ) // FIXME different result than the teacher; needs explanation
+        )
         response <- jobRoutes.orNotFound.run(
           Request(method = Method.PUT, uri = uri"/jobs/843df718-ec6e-4d49-9289-f799c0f40064")
             .withEntity(UpdatedAwesomeJob.jobInfo)
