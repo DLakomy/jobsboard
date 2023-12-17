@@ -44,10 +44,10 @@ class JobRoutes[F[_]: Concurrent: Logger: SecuredHandler] private (jobs: Jobs[F]
 
   // POST /jobs { jobInfo }
   private val createJobRoute: AuthRoute[F] =
-    case req @ POST -> Root / "create" asAuthed _ =>
+    case req @ POST -> Root / "create" asAuthed user =>
       req.request.withValidated[JobInfo]: jobInfo =>
         for
-          jobId <- jobs.create("TODO@dlakomy.pl", jobInfo)
+          jobId <- jobs.create(user.email, jobInfo)
           resp  <- Created(jobId)
         yield resp
 

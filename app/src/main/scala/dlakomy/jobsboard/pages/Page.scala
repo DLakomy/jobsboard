@@ -20,6 +20,7 @@ object Page:
     val SIGNUP          = "/signup"
     val FORGOT_PASSWORD = "/forgotpassword"
     val RESET_PASSWORD  = "/resetpassword"
+    val POST_JOB        = "/postjob"
     val JOBS            = "/jobs"
     val EMPTY           = ""
     val HOME            = "/"
@@ -33,6 +34,7 @@ object Page:
       case SIGNUP              => SignUpPage()
       case FORGOT_PASSWORD     => ForgotPasswordPage()
       case RESET_PASSWORD      => ResetPasswordPage()
+      case POST_JOB            => PostJobPage()
       case EMPTY | HOME | JOBS => JobListPage()
       case s"/jobs/$id"        => JobPage(id)
       case PROFILE             => ProfilePage()
