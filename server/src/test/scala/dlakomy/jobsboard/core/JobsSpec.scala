@@ -113,4 +113,20 @@ class JobsSpec extends AsyncFreeSpec with AsyncIOSpec with Matchers with DoobieS
         yield filteredJobs
 
         program.asserting(_ shouldBe List(AwesomeJob))
+
+    "should give a comprehensive list of filters based on the jobs in the db" in:
+      transactor.use: xa =>
+        val program = for
+          jobs         <- LiveJobs[IO](xa)
+          filteredJobs <- jobs.possibleFilters()
+        yield filteredJobs
+
+        program.asserting:
+          case JobFilter(companies, locations, countries, seniorities, tags, maxSalary, remote) =>
+            companies shouldBe List("Awesome Company")
+            locations shouldBe List("Berlin")
+            countries shouldBe List("Germany")
+            seniorities shouldBe List("Senior")
+            tags.toSet shouldBe Set("scala", "scala-3", "cats")
+            maxSalary shouldBe Some(3000)
   }

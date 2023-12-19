@@ -22,6 +22,7 @@ trait Jobs[F[_]]:
   def find(id: UUID): F[Option[Job]]
   def update(id: UUID, jobInfo: JobInfo): F[Option[Job]]
   def delete(id: UUID): F[Int] // Int - number of rows affected
+  def possibleFilters(): F[JobFilter]
 
 
 class LiveJobs[F[_]: MonadCancelThrow: Logger] private (xa: Transactor[F]) extends Jobs[F]:
@@ -198,8 +199,30 @@ class LiveJobs[F[_]: MonadCancelThrow: Logger] private (xa: Transactor[F]) exten
     """.update.run
       .transact(xa)
 
+  def possibleFilters(): F[JobFilter] =
+    sql"""
+      SELECT ARRAY_AGG(distinct company) companies
+           , ARRAY_AGG(distinct location) locations
+           , ARRAY_AGG(distinct country) FILTER (WHERE country IS NOT NULL) countries
+           , ARRAY_AGG(distinct seniority) FILTER (WHERE seniority IS NOT NULL) seniorities
+           , ARRAY_AGG(distinct tag) tags
+           , MAX(salaryHi) maxSalaryHi
+           , false remote
+        FROM jobs
+             CROSS JOIN LATERAL UNNEST (tags) tag
+    """
+      .query[JobFilter]
+      .option
+      .transact(xa)
+      .map(_.getOrElse(JobFilter()))
+
 
 object LiveJobs:
+
+  given jobFilterRead: Read[JobFilter] =
+    Read[(List[String], List[String], List[String], List[String], List[String], Option[Int], Boolean)].map:
+      case (companies, locations, countries, seniorities, tags, maxSalary, remote) =>
+        JobFilter(companies, locations, countries, seniorities, tags, maxSalary, remote)
 
   given jobRead: Read[Job] = Read[
     (
