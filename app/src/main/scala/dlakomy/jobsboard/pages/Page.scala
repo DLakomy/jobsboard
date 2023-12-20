@@ -2,6 +2,7 @@ package dlakomy.jobsboard.pages
 
 import cats.effect.IO
 import dlakomy.jobsboard.App
+import dlakomy.jobsboard.components.Component
 import dlakomy.jobsboard.core.Router
 import tyrian.*
 
@@ -41,7 +42,7 @@ object Page:
       case _                   => NotFoundPage()
 
 
-abstract class Page:
+abstract class Page extends Component[Page.Msg, App.Msg, Page]:
   def initCmd: Cmd[IO, Page.Msg]
   def update(msg: Page.Msg): (Page, Cmd[IO, App.Msg])
   def view(): Html[Page.Msg | Router.Msg]
