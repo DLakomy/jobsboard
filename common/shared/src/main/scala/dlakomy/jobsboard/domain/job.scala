@@ -56,5 +56,5 @@ object job:
       seniorities: List[String] = List(),
       tags: List[String] = List(),
       maxSalary: Option[Int] = None,
-      remote: Boolean = false
+      remoteOnly: Boolean = false
   )

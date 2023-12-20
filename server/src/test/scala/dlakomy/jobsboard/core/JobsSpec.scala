@@ -100,7 +100,7 @@ class JobsSpec extends AsyncFreeSpec with AsyncIOSpec with Matchers with DoobieS
       transactor.use: xa =>
         val program = for
           jobs         <- LiveJobs[IO](xa)
-          filteredJobs <- jobs.all(JobFilter(remote = true), Pagination.default)
+          filteredJobs <- jobs.all(JobFilter(remoteOnly = true), Pagination.default)
         yield filteredJobs
 
         program.asserting(_ shouldBe List.empty)

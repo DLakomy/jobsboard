@@ -128,7 +128,8 @@ class LiveJobs[F[_]: MonadCancelThrow: Logger] private (xa: Transactor[F]) exten
       filter.tags.toNel.map: tags => // intersection between filter.tags and row's tags
         Fragments.or(tags.map(tag => fr"$tag=any(tags)")),
       filter.maxSalary.map(salary => fr"salaryHi > $salary"),
-      filter.remote.some.map(remote => fr"remote = $remote")
+      // true - only remotes, false - no preference.
+      filter.remoteOnly.some.filter(identity).map(remote => fr"remote = $remote")
     )
 
     val paginationFr =
@@ -136,12 +137,11 @@ class LiveJobs[F[_]: MonadCancelThrow: Logger] private (xa: Transactor[F]) exten
 
     val statement = selectFr |+| fromFr |+| whereFr |+| paginationFr
 
-    Logger[F].info(statement.toString) *>
-      statement
-        .query[Job]
-        .to[List]
-        .transact(xa)
-        .logError(e => s"Failed query: ${e.getMessage}")
+    statement
+      .query[Job]
+      .to[List]
+      .transact(xa)
+      .logError(e => s"Failed query: ${e.getMessage}")
 
   def find(id: UUID): F[Option[Job]] =
     sql"""

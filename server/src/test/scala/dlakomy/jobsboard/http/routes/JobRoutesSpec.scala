@@ -39,7 +39,7 @@ class JobRoutesSpec
       IO.pure(List(AwesomeJob))
 
     override def all(filter: JobFilter, pagination: Pagination): IO[List[Job]] =
-      if (filter.remote) IO.pure(List())
+      if (filter.remoteOnly) IO.pure(List())
       else IO.pure(List(AwesomeJob))
 
     override def find(id: UUID): IO[Option[Job]] =
@@ -99,7 +99,7 @@ class JobRoutesSpec
         jwtToken <- mockedAuthenticator.create(dawidEmail)
         response <- jobRoutes.orNotFound.run(
           Request(method = Method.POST, uri = uri"/jobs")
-            .withEntity(JobFilter(remote = true))
+            .withEntity(JobFilter(remoteOnly = true))
             .withBearerToken(jwtToken)
         )
         retrieved <- response.as[List[Job]]
