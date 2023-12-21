@@ -11,18 +11,17 @@ import tyrian.http.*
 
 
 final case class FilterPanel(possibleFilters: JobFilter = JobFilter(), maybeError: Option[String] = None)
-    extends Component[Page.Msg, Page.Msg, FilterPanel]:
+    extends Component[FilterPanel.Msg, Page.Msg, FilterPanel]:
   import FilterPanel.*
 
   override def initCmd: Cmd[IO, Page.Msg] =
     Commands.getFilters
 
-  override def update(msg: Page.Msg): (FilterPanel, Cmd[IO, Page.Msg]) = msg match
+  override def update(msg: FilterPanel.Msg): (FilterPanel, Cmd[IO, Page.Msg]) = msg match
     case SetPossibleFilters(pF) =>
       (this.copy(possibleFilters = pF), Cmd.None)
     case FilterPanelError(e) =>
       (this.copy(maybeError = Some(e)), Cmd.None)
-    case _ => (this, Cmd.None)
 
   override def view(): Html[Page.Msg] =
     div(`class` := "filter-panel-container")(
@@ -40,7 +39,7 @@ final case class FilterPanel(possibleFilters: JobFilter = JobFilter(), maybeErro
 
 
 object FilterPanel:
-  trait Msg                                                 extends Page.Msg
+  sealed trait Msg                                          extends Page.Msg
   case class FilterPanelError(error: String)                extends Msg
   case class SetPossibleFilters(possibleFilters: JobFilter) extends Msg
 
