@@ -55,9 +55,9 @@ final case class PostJobPage(
     case UpdateLocation(v) =>
       (this.copy(location = v), Cmd.None)
     case UpdateSalaryLo(v) =>
-      (this.copy(salaryLo = Some(v)), Cmd.None)
+      (this.copy(salaryLo = v), Cmd.None)
     case UpdateSalaryHi(v) =>
-      (this.copy(salaryHi = Some(v)), Cmd.None)
+      (this.copy(salaryHi = v), Cmd.None)
     case UpdateCurrency(v) =>
       (this.copy(currency = Some(v)), Cmd.None)
     case UpdateCountry(v) =>
@@ -121,7 +121,7 @@ final case class PostJobPage(
   //////////////////////////////////////////
   private def parseNumber(s: String) =
     // maybe .toOption would be better, ¯\_(ツ)_/¯
-    Try(s.toInt).getOrElse(0)
+    Try(s.toInt).toOption
 
   private def setErrorStatus(message: String) =
     this.copy(status = Some(Page.Status(message, Page.StatusKind.ERROR)))
@@ -141,8 +141,8 @@ object PostJobPage:
   case class UpdateExternalUrl(v: String)             extends Msg
   case object ToggleRemote                            extends Msg
   case class UpdateLocation(v: String)                extends Msg
-  case class UpdateSalaryLo(v: Int)                   extends Msg
-  case class UpdateSalaryHi(v: Int)                   extends Msg
+  case class UpdateSalaryLo(v: Option[Int])           extends Msg
+  case class UpdateSalaryHi(v: Option[Int])           extends Msg
   case class UpdateCurrency(v: String)                extends Msg
   case class UpdateCountry(v: String)                 extends Msg
   case class UpdateImageFile(maybeFile: Option[File]) extends Msg

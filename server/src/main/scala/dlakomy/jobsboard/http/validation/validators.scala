@@ -19,6 +19,8 @@ object validators:
   case class EmptyField(fieldName: String)   extends ValidationFailure(s"'$fieldName' is empty")
   case class InvalidUrl(fieldName: String)   extends ValidationFailure(s"'$fieldName' is not a valid URL")
   case class InvalidEmail(fieldName: String) extends ValidationFailure(s"'$fieldName' is not a valid email")
+  case class InvalidSalary(fieldName: String, min: Int)
+      extends ValidationFailure(s"'$fieldName' must be greater than $min")
 
   type ValidationResult[A] = ValidatedNel[ValidationFailure, A]
 
@@ -40,6 +42,13 @@ object validators:
   def validateEmail(field: String, fieldName: String): ValidationResult[String] =
     if (emailRegex.findFirstMatchIn(field).isDefined) field.validNel
     else InvalidEmail(fieldName).invalidNel
+
+  def validateSalary(field: Option[Int], fieldName: String, min: Int): ValidationResult[Option[Int]] =
+    field match
+      case None => field.validNel
+      case Some(value) =>
+        if (value > min) field.validNel
+        else InvalidSalary(fieldName, min).invalidNel
 
   given jobInfoValidator: Validator[JobInfo] = (jobInfo: JobInfo) =>
     val JobInfo(
@@ -64,6 +73,8 @@ object validators:
     val validDescrption  = validateRequired(description, "description")(_.nonEmpty)
     val validExternalUrl = validateUrl(externalUrl, "externalUrl")
     val validLocation    = validateRequired(location, "location")(_.nonEmpty)
+    val validSalaryLo    = validateSalary(salaryLo, "salaryLo", 0)
+    val validSalaryHi    = validateSalary(salaryHi, "salaryHi", salaryLo.getOrElse(0).max(0))
 
     (
       validCompany,       // company
@@ -72,8 +83,8 @@ object validators:
       validExternalUrl,   // externalUrl
       remote.validNel,    // remote
       validLocation,      // location
-      salaryLo.validNel,  // salaryLo
-      salaryHi.validNel,  // salaryHi
+      validSalaryLo,      // salaryLo
+      validSalaryHi,      // salaryHi
       currency.validNel,  // currency
       country.validNel,   // country
       tags.validNel,      // tags
