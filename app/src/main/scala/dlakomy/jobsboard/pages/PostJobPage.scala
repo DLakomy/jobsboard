@@ -130,7 +130,7 @@ final case class PostJobPage(
     this.copy(status = Some(Page.Status(message, Page.StatusKind.SUCCESS)))
 
   private def renderInvalidPage() =
-    div(h1("Profile"), div("You need to be logged in to view this page"))
+    div(h1("Post job"), div("You need to be logged in to view this page"))
 
 
 object PostJobPage:
