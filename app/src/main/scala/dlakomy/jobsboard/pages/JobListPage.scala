@@ -91,7 +91,7 @@ final case class JobListPage(
       countries = selectedFilters.get("Countries").getOrElse(Set()).toList,
       seniorities = selectedFilters.get("Seniorities").getOrElse(Set()).toList,
       tags = selectedFilters.get("Tags").getOrElse(Set()).toList,
-      maxSalary = Some(filterPanel.maxSalary),
+      maxSalary = Some(filterPanel.maxSalary).filter(_ > 0),
       remoteOnly = filterPanel.remoteOnly
     )
 
