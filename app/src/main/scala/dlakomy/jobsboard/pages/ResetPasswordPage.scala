@@ -9,6 +9,7 @@ import io.circe.parser.*
 import tyrian.Html.*
 import tyrian.*
 import tyrian.http.*
+import dlakomy.jobsboard.components.Anchors
 
 
 final case class ResetPasswordPage(
@@ -47,7 +48,7 @@ final case class ResetPasswordPage(
     renderInput("Token", "token", "text", true, UpdateToken(_)),
     renderInput("Password", "password", "password", true, UpdatePassword(_)),
     button(`type` := "button", onClick(AttemptResetPassword))("Set password"),
-    renderAuxLink(Page.urls.FORGOT_PASSWORD, "Don't have a token yet?")
+    Anchors.renderSimpleNavLink(Page.urls.FORGOT_PASSWORD, "Don't have a token yet?")
   )
 
   //////////////////////////////////////////

@@ -2,6 +2,7 @@ package dlakomy.jobsboard.pages
 
 import cats.effect.IO
 import dlakomy.jobsboard.common.*
+import dlakomy.jobsboard.components.Anchors
 import dlakomy.jobsboard.core.Router
 import dlakomy.jobsboard.domain.auth.ForgotPasswordInfo
 import dlakomy.jobsboard.pages.Page.Msg
@@ -36,7 +37,7 @@ final case class ForgotPasswordPage(email: String = "", status: Option[Page.Stat
     List(
       renderInput("Email", "email", "text", true, UpdateEmail(_)),
       button(`type` := "button", onClick(AttemptResetPassword))("Send email"),
-      renderAuxLink(Page.urls.RESET_PASSWORD, "Have a token?")
+      Anchors.renderSimpleNavLink(Page.urls.RESET_PASSWORD, "Have a token?")
     )
 
   //////////////////////////////////////////

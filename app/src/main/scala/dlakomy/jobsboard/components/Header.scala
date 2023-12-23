@@ -46,38 +46,21 @@ object Header:
 
   private def renderNavLinks(): List[Html[App.Msg]] =
     val constantLinks = List(
-      renderSimpleNavLink("Jobs", Page.urls.JOBS),
-      renderSimpleNavLink("Post job", Page.urls.POST_JOB)
+      Anchors.renderSimpleNavLink("Jobs", Page.urls.JOBS),
+      Anchors.renderSimpleNavLink("Post job", Page.urls.POST_JOB)
     )
 
     val unauthedLinks = List(
-      renderSimpleNavLink("Login", Page.urls.LOGIN),
-      renderSimpleNavLink("Sign up", Page.urls.SIGNUP)
+      Anchors.renderSimpleNavLink("Login", Page.urls.LOGIN),
+      Anchors.renderSimpleNavLink("Sign up", Page.urls.SIGNUP)
     )
 
     val authedLinks = List(
-      renderSimpleNavLink("Profile", Page.urls.PROFILE),
-      renderNavLink("Log out", Page.urls.HASH)(_ => Session.LogOut)
+      Anchors.renderSimpleNavLink("Profile", Page.urls.PROFILE),
+      Anchors.renderNavLink("Log out", Page.urls.HASH)(_ => Session.LogOut)
     )
 
     constantLinks ++ (
       if (Session.isActive) authedLinks
       else unauthedLinks
-    )
-
-  private def renderSimpleNavLink(text: String, location: String) =
-    renderNavLink(text, location)(Router.ChangeLocation(_))
-
-  private def renderNavLink(text: String, location: String)(location2msg: String => App.Msg) =
-    li(`class` := "nav-item")(
-      a(
-        href    := location,
-        `class` := "nav-link",
-        onEvent(
-          "click",
-          e =>
-            e.preventDefault()
-            location2msg(location)
-        )
-      )(text)
     )

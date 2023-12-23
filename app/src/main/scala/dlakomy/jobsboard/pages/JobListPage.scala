@@ -3,7 +3,9 @@ package dlakomy.jobsboard.pages
 import cats.effect.IO
 import dlakomy.jobsboard
 import dlakomy.jobsboard.common.*
+import dlakomy.jobsboard.components.Anchors
 import dlakomy.jobsboard.components.FilterPanel
+import dlakomy.jobsboard.core.Router
 import dlakomy.jobsboard.domain.job.*
 import dlakomy.jobsboard.pages.Page.Msg
 import io.circe.generic.auto.*
@@ -17,7 +19,7 @@ final case class JobListPage(
     jobs: List[Job] = List.empty,
     jobFilter: JobFilter = JobFilter(),
     canLoadMore: Boolean = true,
-    status: Option[Page.Status] = Some(Page.Status("Loading", Page.StatusKind.LOADING))
+    status: Option[Page.Status] = Some(Page.Status.LOADING)
 ) extends Page:
   import JobListPage.*
 
@@ -39,7 +41,7 @@ final case class JobListPage(
       (this.copy(filterPanel = newFilterPanel), cmd)
     case _ => (this, Cmd.None)
 
-  def view(): Html[Page.Msg] =
+  def view(): Html[Page.Msg | Router.Msg] =
     div(`class` := "job-list-page")(
       filterPanel.view(),
       div(`class` := "jobs-container")(
@@ -61,7 +63,9 @@ final case class JobListPage(
         )
       ),
       div(`class` := "job-card-content")(
-        h4(s"${job.jobInfo.company} - ${job.jobInfo.title}")
+        h4(
+          Anchors.renderSimpleNavLink(s"${job.jobInfo.company} - ${job.jobInfo.title}", Page.urls.JOB(job.id.toString))
+        )
       ),
       div(`class` := "job-card-apply")(
         a(href := job.jobInfo.externalUrl, target := "blank")("Apply")

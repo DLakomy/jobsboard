@@ -67,18 +67,6 @@ abstract class FormPage(title: String, status: Option[Page.Status]) extends Page
       textarea(`class` := "form-control", id := uid, onInput(onChange))("")
     )
 
-  final protected def renderAuxLink(location: String, text: String): Html[Router.Msg] =
-    a(
-      href    := location,
-      `class` := "aux-link",
-      onEvent(
-        "click",
-        e =>
-          e.preventDefault()
-          Router.ChangeLocation(location)
-      )
-    )(text)
-
   final protected def renderImageUploadInput(
       name: String,
       uid: String,

@@ -10,6 +10,7 @@ import io.circe.generic.auto.*
 import tyrian.Html.*
 import tyrian.*
 import tyrian.http.*
+import dlakomy.jobsboard.components.Anchors
 
 
 final case class LoginPage(email: String = "", password: String = "", status: Option[Page.Status] = None)
@@ -45,7 +46,7 @@ final case class LoginPage(email: String = "", password: String = "", status: Op
       renderInput("Email", "email", "text", true, UpdateEmail(_)),
       renderInput("Password", "password", "password", true, UpdatePassword(_)),
       button(`type` := "button", onClick(AttemptLogin))("Sign up"),
-      renderAuxLink(Page.urls.FORGOT_PASSWORD, "Forgot password?")
+      Anchors.renderSimpleNavLink(Page.urls.FORGOT_PASSWORD, "Forgot password?")
     )
   //////////////////////////////////////////
   // private

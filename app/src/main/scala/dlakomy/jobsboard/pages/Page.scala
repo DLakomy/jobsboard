@@ -15,6 +15,8 @@ object Page:
     case SUCCESS, ERROR, LOADING
 
   final case class Status(message: String, kind: StatusKind)
+  object Status:
+    val LOADING = Page.Status("Loading", Page.StatusKind.LOADING)
 
   object urls:
     val LOGIN           = "/login"
@@ -27,6 +29,8 @@ object Page:
     val HOME            = "/"
     val HASH            = "#"
     val PROFILE         = "/profile"
+    inline def JOB(id: String) =
+      s"/jobs/$id"
 
   def get(location: String) =
     import urls.*
