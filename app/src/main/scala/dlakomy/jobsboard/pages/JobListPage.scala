@@ -42,10 +42,16 @@ final case class JobListPage(
     case _ => (this, Cmd.None)
 
   def view(): Html[Page.Msg | Router.Msg] =
-    div(`class` := "job-list-page")(
-      filterPanel.view(),
-      div(`class` := "jobs-container")(
-        jobs.map(renderJob) ++ maybeRenderLoadMore
+    section(`class` := "section-1")(
+      div(`class` := "container")(
+        div(`class` := "row jvm-recent-jobs-body")(
+          div(`class` := "col-lg-4")(
+            filterPanel.view()
+          ),
+          div(`class` := "col-lg-8")(
+            jobs.map(renderJob) ++ maybeRenderLoadMore
+          )
+        )
       )
     )
 

@@ -43,20 +43,72 @@ final case class FilterPanel(
       (this.copy(remoteOnly = checked, dirty = true), Cmd.None)
 
   override def view(): Html[Page.Msg] =
-    div(`class` := "filter-panel-container")(
-      maybeRenderError(),
-      renderSalaryFilter(),
-      renderRemoteCheckbox(),
-      renderCheckboxGroup("Companies", possibleFilters.companies),
-      renderCheckboxGroup("Locations", possibleFilters.locations),
-      renderCheckboxGroup("Countries", possibleFilters.countries),
-      renderCheckboxGroup("Tags", possibleFilters.tags),
-      renderCheckboxGroup("Seniorities", possibleFilters.seniorities),
-      renderApplyFiltersBtn()
+    div(`class` := "accordion accordion-flush", id := "accordionFlushExample")(
+      div(`class` := "accordion-item")(
+        h2(`class` := "accordion-header", id := "flush-headingOne")(
+          button(
+            `class` := "accordion-button",
+            id      := "accordion-search-filter",
+            `type`  := "button",
+            attribute("data-bs-toggle", "collapse"),
+            attribute("data-bs-target", "#flush-collapseOne"),
+            attribute("aria-expanded", "true"),
+            attribute("aria-controls", "flush-collapseOne")
+          )(
+            div(`class` := "jvm-recent-jobs-accordion-body-heading")(
+              h3(span("Search"), text(" Filters"))
+            )
+          )
+        ),
+        div(
+          `class` := "accordion-collapse collapse show",
+          id      := "flush-collapseOne",
+          attribute("aria-labelledby", "flush-headingOne"),
+          attribute("data-bs-parent", "#accordionFlushExample")
+        )(
+          div(`class` := "accordion-body p-0")(
+            maybeRenderError(),
+            renderSalaryFilter(),
+            renderRemoteCheckbox(),
+            renderCheckboxGroup("Companies", possibleFilters.companies),
+            renderCheckboxGroup("Locations", possibleFilters.locations),
+            renderCheckboxGroup("Countries", possibleFilters.countries),
+            renderCheckboxGroup("Tags", possibleFilters.tags),
+            renderCheckboxGroup("Seniorities", possibleFilters.seniorities),
+            renderApplyFiltersBtn()
+          )
+        )
+      )
     )
 
   ///////////////////// private
   /////////////////////////////
+  private def renderFilterGroup(groupName: String, contents: Html[Page.Msg]) =
+    div(`class` := "accordion-item")(
+      h2(`class` := "accordion-header", id := s"heading$groupName")(
+        button(
+          `class` := "accordion-button collapsed",
+          `type`  := "button",
+          attribute("data-bs-toggle", "collapse"),
+          attribute("data-bs-target", s"#collapse$groupName"),
+          attribute("aria-expanded", "false"),
+          attribute("aria-controls", s"collapse$groupName")
+        )(
+          groupName
+        )
+      ),
+      div(
+        `class` := "accordion-collapse collapse",
+        id      := s"collapse$groupName",
+        attribute("aria-labelledby", "headingOne"),
+        attribute("data-bs-parent", "#accordionExample")
+      )(
+        div(`class` := "accordion-body")(
+          contents // <--- inject things here
+        )
+      )
+    )
+
   private def maybeRenderError() =
     maybeError
       .map: e =>
@@ -64,45 +116,50 @@ final case class FilterPanel(
       .getOrElse(div())
 
   private def renderSalaryFilter() =
-    div(`class` := "filter-group")(
-      h6(`class` := "filter-group-header")("Salary"),
-      div(`class` := "filter-group-content")(
+    renderFilterGroup(
+      "Salary",
+      div(`class` := "mb-3")(
         label(`for` := "filter-salary")("Min (in local currrency)"),
         input(`type` := "number", id := "salary", onInput(s => UpdateSalaryInput(if (s.isEmpty) 0 else (s.toInt))))
       )
     )
 
   private def renderRemoteCheckbox() =
-    div(`class` := "filter-group-content")(
-      label(`for` := s"filter-remote")("Remote only"),
-      input(
-        `type` := "checkbox",
-        id     := s"filter-remote",
-        checked(remoteOnly),
-        onEvent(
-          "change",
-          e =>
-            val checkbox = e.target.asInstanceOf[HTMLInputElement]
-            UpdateRemote(checkbox.checked)
+    renderFilterGroup(
+      "Remote",
+      div(`class` := "form-check")(
+        label(`class` := "form-check-label", `for` := s"filter-remote")("Remote only"),
+        input(
+          `class` := "form-check-input",
+          `type`  := "checkbox",
+          id      := s"filter-remote",
+          checked(remoteOnly),
+          onEvent(
+            "change",
+            e =>
+              val checkbox = e.target.asInstanceOf[HTMLInputElement]
+              UpdateRemote(checkbox.checked)
+          )
         )
       )
     )
 
   private def renderCheckboxGroup(groupName: String, values: List[String]) =
     val selectedValues = selectedFilters.get(groupName).getOrElse(Set())
-    div(`class` := "filter-group")(
-      h6(`class` := "filter-group-header")(groupName),
-      div(`class` := "filter-group-content")(
+    renderFilterGroup(
+      groupName,
+      div(`class` := "mb-3")(
         values.map(value => renderCheckbox(groupName, value, selectedValues))
       )
     )
 
   private def renderCheckbox(groupName: String, value: String, selectedValues: Set[String]) =
-    div(`class` := "filter-group-content")(
-      label(`for` := s"filter-$groupName-$value")(value),
+    div(`class` := "form-check")(
+      label(`class` := "form-check-label", `for` := s"filter-$groupName-$value")(value),
       input(
-        `type` := "checkbox",
-        id     := s"filter-$groupName-$value",
+        `class` := "form-check-input",
+        `type`  := "checkbox",
+        id      := s"filter-$groupName-$value",
         checked(selectedValues.contains(value)),
         onEvent(
           "change",
@@ -114,7 +171,11 @@ final case class FilterPanel(
     )
 
   private def renderApplyFiltersBtn() =
-    button(`type` := "button", disabled(!dirty), onClick(TriggerFilter))("Apply filters")
+    div(`class` := "jvm-accordion-search-btn")(
+      button(`class` := "btn btn-primary", `type` := "button", disabled(!dirty), onClick(TriggerFilter))(
+        "Apply filters"
+      )
+    )
 
 
 object FilterPanel:
