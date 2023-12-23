@@ -11,7 +11,6 @@ import org.scalajs.dom.File
 import org.scalajs.dom.FileReader
 import tyrian.Html.*
 import tyrian.*
-import tyrian.cmds.Logger
 import tyrian.http.*
 
 import scala.util.Try
@@ -66,7 +65,7 @@ final case class PostJobPage(
     case UpdateImageFile(maybeFile) =>
       (this, Commands.loadFile(maybeFile))
     case UpdateImage(maybeImage) =>
-      (this.copy(image = maybeImage), Logger.consoleLog("I've got an image: " + maybeImage))
+      (this.copy(image = maybeImage), Cmd.None)
     case UpdateTags(v) =>
       (this.copy(tags = Some(v)), Cmd.None)
     case UpdateSeniority(v) =>
@@ -76,7 +75,7 @@ final case class PostJobPage(
     case PostJobError(error) =>
       (setErrorStatus(error), Cmd.None)
     case PostJobSuccess(jobId) =>
-      (setSuccessStatus("Success!"), Logger.consoleLog(s"Job id: $jobId"))
+      (setSuccessStatus("Success!"), Cmd.None)
     case AttemptPostJob =>
       (
         this,

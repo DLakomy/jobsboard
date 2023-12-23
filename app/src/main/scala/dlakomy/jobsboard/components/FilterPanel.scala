@@ -8,7 +8,6 @@ import io.circe.generic.auto.*
 import org.scalajs.dom.HTMLInputElement
 import tyrian.Html.*
 import tyrian.*
-import tyrian.cmds.Logger
 import tyrian.http.*
 
 
@@ -39,7 +38,7 @@ final case class FilterPanel(
       val oldGroup  = selectedFilters.get(groupName).getOrElse(Set())
       val newGroup  = if (checked) oldGroup + value else oldGroup - value
       val newGroups = selectedFilters + (groupName -> newGroup)
-      (this.copy(selectedFilters = newGroups, dirty = true), Logger.consoleLog(s"Filters: $newGroups"))
+      (this.copy(selectedFilters = newGroups, dirty = true), Cmd.None)
     case UpdateRemote(checked) =>
       (this.copy(remoteOnly = checked, dirty = true), Cmd.None)
 
