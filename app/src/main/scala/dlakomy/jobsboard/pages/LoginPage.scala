@@ -4,13 +4,13 @@ import cats.effect.IO
 import dlakomy.jobsboard.App
 import dlakomy.jobsboard.common.Constants
 import dlakomy.jobsboard.common.*
+import dlakomy.jobsboard.components.Anchors
 import dlakomy.jobsboard.core.*
 import dlakomy.jobsboard.domain.auth.LoginInfo
 import io.circe.generic.auto.*
 import tyrian.Html.*
 import tyrian.*
 import tyrian.http.*
-import dlakomy.jobsboard.components.Anchors
 
 
 final case class LoginPage(email: String = "", password: String = "", status: Option[Page.Status] = None)
@@ -46,7 +46,7 @@ final case class LoginPage(email: String = "", password: String = "", status: Op
       renderInput("Email", "email", "text", true, UpdateEmail(_)),
       renderInput("Password", "password", "password", true, UpdatePassword(_)),
       button(`type` := "button", onClick(AttemptLogin))("Sign up"),
-      Anchors.renderSimpleNavLink(Page.urls.FORGOT_PASSWORD, "Forgot password?")
+      Anchors.renderSimpleNavLink("Forgot password?", Page.urls.FORGOT_PASSWORD)
     )
   //////////////////////////////////////////
   // private
