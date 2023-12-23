@@ -11,16 +11,16 @@ object Anchors:
   def renderSimpleNavLink(text: String, location: String): Html[Router.Msg] =
     renderNavLink(text, location)(Router.ChangeLocation(_))
 
-  def renderNavLink[M <: App.Msg](text: String, location: String)(location2msg: String => M): Html[M] =
-    li(`class` := "nav-item")(
-      a(
-        href    := location,
-        `class` := "nav-link",
-        onEvent(
-          "click",
-          e =>
-            e.preventDefault()
-            location2msg(location)
-        )
-      )(text)
-    )
+  def renderNavLink[M <: App.Msg](text: String, location: String, cssClass: String = "")(
+      location2msg: String => M
+  ): Html[M] =
+    a(
+      href    := location,
+      `class` := cssClass,
+      onEvent(
+        "click",
+        e =>
+          e.preventDefault()
+          location2msg(location)
+      )
+    )(text)
