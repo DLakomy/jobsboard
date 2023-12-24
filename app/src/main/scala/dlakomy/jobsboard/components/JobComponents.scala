@@ -7,8 +7,15 @@ import dlakomy.jobsboard.pages.Page
 import tyrian.Html
 import tyrian.Html.*
 
+import scala.scalajs.js
+import scala.scalajs.js.annotation.*
+
 
 object JobComponents:
+
+  @js.native
+  @JSImport("/static/img/nologo.png", JSImport.Default)
+  private val noLogoImg: String = js.native
 
   def card(job: Job): Html[Router.Msg] =
     div(`class` := "jvm-recent-jobs-cards")(
@@ -16,7 +23,8 @@ object JobComponents:
         img(
           `class` := "img-fluid",
           src     := job.jobInfo.image.getOrElse(""),
-          alt     := job.jobInfo.title
+          alt     := job.jobInfo.title,
+          attribute("onerror", s"this.src='$noLogoImg'")
         )
       ),
       div(`class` := "jvm-recent-jobs-card-contents")(
