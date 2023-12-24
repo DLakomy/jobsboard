@@ -8,8 +8,8 @@ import tyrian.*
 
 
 object Anchors:
-  def renderSimpleNavLink(text: String, location: String): Html[Router.Msg] =
-    renderNavLink(text, location)(Router.ChangeLocation(_))
+  def renderSimpleNavLink(text: String, location: String, cssClass: String = ""): Html[Router.Msg] =
+    renderNavLink(text, location, cssClass)(Router.ChangeLocation(_))
 
   def renderNavLink[M <: App.Msg](text: String, location: String, cssClass: String = "")(
       location2msg: String => M

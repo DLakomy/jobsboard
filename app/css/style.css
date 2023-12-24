@@ -406,12 +406,12 @@ main .section-1 .jvm-recent-jobs-cards .jvm-recent-jobs-card-img {
   float: left;
 }
 
-main .section-1 .jvm-recent-jobs-card-title {
+main .section-1 .jvm-recent-jobs-card-contents {
   width: 66%;
   float: left;
 }
 
-main .section-1 .jvm-recent-jobs-cards .jvm-recent-jobs-card-title h2 {
+main .section-1 .jvm-recent-jobs-cards .jvm-recent-jobs-card-contents h2 {
   font-style: normal;
   font-weight: 600;
   font-size: 16px;
@@ -591,7 +591,7 @@ main .section-1 .jvm-recent-jobs-load-more-jobs-btn a {
     padding: 26px;
   }
 
-  main .section-1 .jvm-recent-jobs-cards .jvm-recent-jobs-card-title h2,
+  main .section-1 .jvm-recent-jobs-cards .jvm-recent-jobs-card-contents h2,
   main .section-1 .jvm-recent-jobs-cards .jvm-recent-jobs-card-btn-apply button {
     font-size: 14px;
   }
@@ -777,7 +777,7 @@ main .section-1 .jvm-recent-jobs-load-more-jobs-btn a {
     padding: 20px;
   }
 
-  main .section-1 .jvm-recent-jobs-cards .jvm-recent-jobs-card-title h2,
+  main .section-1 .jvm-recent-jobs-cards .jvm-recent-jobs-card-contents h2,
   main .section-1 .jvm-recent-jobs-cards .jvm-recent-jobs-card-btn-apply button {
     font-size: 12px;
   }
@@ -903,7 +903,7 @@ main .section-1 .jvm-recent-jobs-load-more-jobs-btn a {
     padding: 15px;
   }
 
-  main .section-1 .jvm-recent-jobs-cards .jvm-recent-jobs-card-title h2,
+  main .section-1 .jvm-recent-jobs-cards .jvm-recent-jobs-card-contents h2,
   main .section-1 .jvm-recent-jobs-cards .jvm-recent-jobs-card-btn-apply button {
     font-size: 10px;
   }
@@ -983,7 +983,7 @@ main .section-1 .jvm-recent-jobs-load-more-jobs-btn a {
     padding: 0px 0px !important;
   }
 
-  main .section-1 .jvm-recent-jobs-cards .jvm-recent-jobs-card-title h2,
+  main .section-1 .jvm-recent-jobs-cards .jvm-recent-jobs-card-contents h2,
   main .section-1 .jvm-recent-jobs-cards .jvm-recent-jobs-card-btn-apply button {
     font-size: 8px;
     margin: 0;
@@ -1007,7 +1007,7 @@ main .section-1 .jvm-recent-jobs-load-more-jobs-btn a {
     padding: 10px;
   }
 
-  main .section-1 .jvm-recent-jobs-cards .jvm-recent-jobs-card-title h2,
+  main .section-1 .jvm-recent-jobs-cards .jvm-recent-jobs-card-contents h2,
   main .section-1 .jvm-recent-jobs-cards .jvm-recent-jobs-card-btn-apply button {
     font-size: 9px;
   }
@@ -1091,7 +1091,7 @@ main .section-1 .jvm-recent-jobs-load-more-jobs-btn a {
     padding: 10px !important;
   }
 
-  main .section-1 .jvm-recent-jobs-cards .jvm-recent-jobs-card-title h2,
+  main .section-1 .jvm-recent-jobs-cards .jvm-recent-jobs-card-contents h2,
   main .section-1 .jvm-recent-jobs-cards .jvm-recent-jobs-card-btn-apply button {
     font-size: 8px;
   }
@@ -1170,7 +1170,7 @@ main .section-1 .jvm-recent-jobs-load-more-jobs-btn a {
     padding: 6px !important;
   }
 
-  main .section-1 .jvm-recent-jobs-cards .jvm-recent-jobs-card-title h2,
+  main .section-1 .jvm-recent-jobs-cards .jvm-recent-jobs-card-contents h2,
   main .section-1 .jvm-recent-jobs-cards .jvm-recent-jobs-card-btn-apply button {
     font-size: 7px;
   }
@@ -1225,7 +1225,7 @@ main .section-1 .jvm-recent-jobs-load-more-jobs-btn a {
     padding: 3px !important;
   }
 
-  main .section-1 .jvm-recent-jobs-cards .jvm-recent-jobs-card-title h2,
+  main .section-1 .jvm-recent-jobs-cards .jvm-recent-jobs-card-contents h2,
   main .section-1 .jvm-recent-jobs-cards .jvm-recent-jobs-card-btn-apply button {
     font-size: 6px;
   }
@@ -1271,57 +1271,3 @@ main .section-1 .jvm-recent-jobs-load-more-jobs-btn a {
 
 
 /* ============================== MEDIA QUERY END ============================== */
-/* CUSTOM CSS */
-/************************************************/
-.home-logo {
-  height: 50px;
-}
-
-.aux-link {
-  display: block;
-}
-
-.jobs-container {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-}
-
-.job-card {
-  display: flex;
-  align-items: center;
-  border: 1px solid gray;
-  border-radius: 20px;
-  margin: 10px;
-  padding: 20px;
-}
-
-.job-logo {
-  width: 100px;
-}
-
-.job-card-content {
-  flex: 1;
-}
-
-.load-more-action {
-  align-self: center;
-}
-
-.job-list-page {
-  display: flex;
-}
-
-.filter-panel-container {
-  margin: 10px;
-  padding: 10px;
-  border: 1px solid orange;
-  border-radius: 20px;
-}
-
-.job-hero {
-  display: flex;
-  align-items: center;
-  margin: 20px;
-}

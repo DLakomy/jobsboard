@@ -13,6 +13,10 @@ import core.*
 
 
 object App:
+  // Daniel did a trait App.Msg with these members
+  // TBH his solution appears to be easier to use
+  // the distinction looks noice, but is a hassle
+  // to maintain
   type Msg = Router.Msg | Session.Msg | Page.Msg
 
   case class Model(router: Router, session: Session, page: Page)

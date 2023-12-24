@@ -3,8 +3,7 @@ package dlakomy.jobsboard.pages
 import cats.effect.IO
 import dlakomy.jobsboard
 import dlakomy.jobsboard.common.*
-import dlakomy.jobsboard.components.Anchors
-import dlakomy.jobsboard.components.FilterPanel
+import dlakomy.jobsboard.components.*
 import dlakomy.jobsboard.core.Router
 import dlakomy.jobsboard.domain.job.*
 import dlakomy.jobsboard.pages.Page.Msg
@@ -49,7 +48,7 @@ final case class JobListPage(
             filterPanel.view()
           ),
           div(`class` := "col-lg-8")(
-            jobs.map(renderJob) ++ maybeRenderLoadMore
+            jobs.map(JobComponents.card) ++ maybeRenderLoadMore
           )
         )
       )
@@ -59,25 +58,6 @@ final case class JobListPage(
   // private
   //////////////////////////////////////////
   // ui
-  private def renderJob(job: Job) =
-    div(`class` := "job-card")(
-      div(`class` := "job-card-img")(
-        img(
-          `class` := "job-logo",
-          src     := job.jobInfo.image.getOrElse(""),
-          alt     := job.jobInfo.title
-        )
-      ),
-      div(`class` := "job-card-content")(
-        h4(
-          Anchors.renderSimpleNavLink(s"${job.jobInfo.company} - ${job.jobInfo.title}", Page.urls.JOB(job.id.toString))
-        )
-      ),
-      div(`class` := "job-card-apply")(
-        a(href := job.jobInfo.externalUrl, target := "blank")("Apply")
-      )
-    )
-
   private def maybeRenderLoadMore = status.map: s =>
     div(`class` := "load-more-action")(
       s match
@@ -85,7 +65,7 @@ final case class JobListPage(
         case Page.Status(e, Page.StatusKind.ERROR)   => div(e)
         case Page.Status(_, Page.StatusKind.SUCCESS) =>
           if (canLoadMore)
-            button(`type` := "button", onClick(LoadMoreJobs))("Load more")
+            button(`type` := "button", `class` := "load-more-btn", onClick(LoadMoreJobs))("Load more")
           else
             div("All jobs loaded")
     )
