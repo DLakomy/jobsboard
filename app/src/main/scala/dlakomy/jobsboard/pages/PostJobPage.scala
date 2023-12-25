@@ -3,10 +3,9 @@ package dlakomy.jobsboard.pages
 import cats.effect.IO
 import cats.syntax.traverse.*
 import dlakomy.jobsboard.common.*
-import dlakomy.jobsboard.core.Session
+import dlakomy.jobsboard.core.*
 import dlakomy.jobsboard.domain.job.JobInfo
 import io.circe.generic.auto.*
-import io.circe.parser.*
 import org.scalajs.dom.File
 import org.scalajs.dom.FileReader
 import tyrian.Html.*
@@ -36,12 +35,7 @@ final case class PostJobPage(
 
   import PostJobPage.*
 
-  override def view() =
-    // this logic could be present in the FormPage - we'll see if it's a reusable case
-    if (Session.isActive) super.view()
-    else renderInvalidPage()
-
-  override def update(msg: Page.Msg): (Page, Cmd[IO, Page.Msg]) = msg match
+  override def update(msg: Page.Msg): (Page, Cmd[IO, Page.Msg | Router.Msg]) = msg match
     case UpdateCompany(v) =>
       (this.copy(company = v), Cmd.None)
     case UpdateTitle(v) =>
@@ -79,7 +73,7 @@ final case class PostJobPage(
     case AttemptPostJob =>
       (
         this,
-        Commands.postJob(
+        Commands.postJob(true)(
           company,
           title,
           description,
@@ -98,23 +92,25 @@ final case class PostJobPage(
       )
 
   override protected def renderFormContent(): List[Html[Page.Msg]] =
-    List(
-      renderInput("Company", "company", "text", true, UpdateCompany(_)),
-      renderInput("Title", "title", "text", true, UpdateTitle(_)),
-      renderTextArea("Description", "description", true, UpdateDescription(_)),
-      renderInput("ExternalUrl", "externalUrl", "text", true, UpdateExternalUrl(_)),
-      renderInput("Location", "location", "text", true, UpdateLocation(_)),
-      renderToggle("Remote", "remote", true, _ => ToggleRemote),
-      renderInput("salaryLo", "salaryLo", "number", false, s => UpdateSalaryLo(parseNumber(s))),
-      renderInput("salaryHi", "salaryHi", "number", false, s => UpdateSalaryHi(parseNumber(s))),
-      renderInput("Currency", "currency", "text", false, UpdateCurrency(_)),
-      renderInput("Country", "country", "text", false, UpdateCountry(_)),
-      renderImageUploadInput("Logo", "logo", image, UpdateImageFile(_)),
-      renderInput("Tags", "tags", "text", false, UpdateTags(_)),
-      renderInput("Seniority", "seniority", "text", false, UpdateSeniority(_)),
-      renderInput("Other", "other", "text", false, UpdateOther(_)),
-      button(`type` := "button", onClick(AttemptPostJob))("Post job")
-    )
+    if (!Session.isActive) renderInvalidContents()
+    else
+      List(
+        renderInput("Company", "company", "text", true, UpdateCompany(_)),
+        renderInput("Title", "title", "text", true, UpdateTitle(_)),
+        renderTextArea("Description", "description", true, UpdateDescription(_)),
+        renderInput("ExternalUrl", "externalUrl", "text", true, UpdateExternalUrl(_)),
+        renderInput("Location", "location", "text", true, UpdateLocation(_)),
+        renderToggle("Remote", "remote", true, _ => ToggleRemote),
+        renderInput("salaryLo", "salaryLo", "number", false, s => UpdateSalaryLo(parseNumber(s))),
+        renderInput("salaryHi", "salaryHi", "number", false, s => UpdateSalaryHi(parseNumber(s))),
+        renderInput("Currency", "currency", "text", false, UpdateCurrency(_)),
+        renderInput("Country", "country", "text", false, UpdateCountry(_)),
+        renderImageUploadInput("Logo", "logo", image, UpdateImageFile(_)),
+        renderInput("Tags", "tags", "text", false, UpdateTags(_)),
+        renderInput("Seniority", "seniority", "text", false, UpdateSeniority(_)),
+        renderInput("Other", "other", "text", false, UpdateOther(_)),
+        button(`type` := "button", onClick(AttemptPostJob))("Post job")
+      )
 
   //////////////////////////////////////////
   // private
@@ -129,8 +125,8 @@ final case class PostJobPage(
   private def setSuccessStatus(message: String) =
     this.copy(status = Some(Page.Status(message, Page.StatusKind.SUCCESS)))
 
-  private def renderInvalidPage() =
-    div(h1("Post job"), div("You need to be logged in to view this page"))
+  private def renderInvalidContents() =
+    List(p(`class` := "form-text")("You need to be logged in to view this page"))
 
 
 object PostJobPage:
@@ -156,26 +152,23 @@ object PostJobPage:
   case object AttemptPostJob extends Msg
 
   object Endpoints:
-    val postJob = new Endpoint[Msg]:
-      override val location: String          = Constants.endpoints.postJob
-      override val method: Method            = Method.Post
-      override val onError: HttpError => Msg = e => PostJobError(e.toString)
-      override val onResponse: Response => Msg = response =>
-        response.status match
-          case Status(s, _) if s >= 200 && s < 300 =>
-            val jobId = response.body
-            PostJobSuccess(jobId)
-          case Status(s, _) if s >= 400 && s < 500 =>
-            val json   = response.body
-            val parsed = parse(json).flatMap(_.hcursor.get[String]("error"))
-            parsed match
-              case Left(e)                => PostJobError(s"Response error: ${e.getMessage}")
-              case Right(errorFromServer) => PostJobError(errorFromServer)
-          case _ =>
-            PostJobError("Unknown reply from the server.")
+    val postJob = new Endpoint[Page.Msg | Router.Msg]:
+      override val location: String = Constants.endpoints.postJob
+      override val method: Method   = Method.Post
+      override val onError: HttpError => Page.Msg | Router.Msg =
+        e => PostJobError(e.toString)
+      override val onResponse: Response => Page.Msg | Router.Msg =
+        Endpoint.onResponseText(PostJobSuccess(_), PostJobError(_))
+
+    val postJobPromoted = new Endpoint[Page.Msg | Router.Msg]:
+      override val location: String                            = Constants.endpoints.postJobPromoted
+      override val method: Method                              = Method.Post
+      override val onError: HttpError => Page.Msg | Router.Msg = e => PostJobError(e.toString)
+      override val onResponse: Response => Page.Msg | Router.Msg =
+        Endpoint.onResponseText(Router.ExternalRedirect(_), PostJobError(_))
 
   object Commands:
-    def postJob(
+    def postJob(promoted: Boolean = true)(
         company: String,
         title: String,
         description: String,
@@ -190,8 +183,12 @@ object PostJobPage:
         image: Option[String],
         seniority: Option[String],
         other: Option[String]
-    ): Cmd[IO, Msg] =
-      Endpoints.postJob.callAuthorized(
+    ): Cmd[IO, Page.Msg | Router.Msg] =
+      val endpoint =
+        if (promoted) Endpoints.postJobPromoted
+        else Endpoints.postJob
+
+      endpoint.callAuthorized(
         JobInfo(
           company,
           title,

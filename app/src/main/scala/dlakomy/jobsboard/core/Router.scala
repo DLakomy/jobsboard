@@ -2,6 +2,7 @@ package dlakomy.jobsboard.core
 
 import cats.effect.IO
 import fs2.dom.History
+import org.scalajs.dom.window
 import tyrian.*
 
 
@@ -17,11 +18,19 @@ final case class Router private (location: String, history: History[IO, String])
           if (browserTriggered) Cmd.None
           else goto(newLocation)
         (this.copy(location = newLocation), historyCmd)
-    case _ => (this, Cmd.None) // TODO external redirects
+    case ExternalRedirect(location) =>
+      window.location.href = maybeCleanUrl(location)
+      (this, Cmd.None)
 
   def goto[M](location: String): Cmd[IO, M] =
     Cmd.SideEffect[IO]:
       history.pushState(location, location)
+
+  /////////// private
+  private def maybeCleanUrl(url: String) =
+    if (url.startsWith("\""))
+      url.substring(1, url.length() - 1)
+    else url // KISS for now
 
 
 object Router:
