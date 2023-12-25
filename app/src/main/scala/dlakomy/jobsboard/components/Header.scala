@@ -1,13 +1,11 @@
 package dlakomy.jobsboard.components
 
 import dlakomy.jobsboard.App
+import dlakomy.jobsboard.common.Constants
 import dlakomy.jobsboard.core.*
 import dlakomy.jobsboard.pages.*
 import tyrian.Html.*
 import tyrian.*
-
-import scala.scalajs.js
-import scala.scalajs.js.annotation.*
 
 
 object Header:
@@ -44,10 +42,6 @@ object Header:
     )
 
   /////////////////////////// private
-  @js.native
-  @JSImport("/static/img/rtjvmlogo_128x128.png", JSImport.Default)
-  private val logoImage: String = js.native
-
   private def renderLogo() =
     a(
       href    := Page.urls.HOME,
@@ -61,7 +55,7 @@ object Header:
     )(
       img(
         `class` := "home-logo",
-        src     := logoImage,
+        src     := Constants.logoImage,
         alt     := "Jobsboard logo"
       )
     )

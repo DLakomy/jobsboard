@@ -1,6 +1,7 @@
 package dlakomy.jobsboard.pages
 
 import cats.effect.IO
+import dlakomy.jobsboard.common.Constants
 import dlakomy.jobsboard.core.*
 import dlakomy.jobsboard.pages.Page.Msg
 import org.scalajs.dom.HTMLInputElement
@@ -23,24 +24,33 @@ abstract class FormPage(title: String, status: Option[Page.Status]) extends Page
 
   // protected API
   final protected def renderForm(): Html[Page.Msg | Router.Msg] =
-    div(`class` := "form-section")(
-      div(`class` := "top-section")(
-        h1(title)
-      ),
-      form(
-        name    := title.toLowerCase.replace(' ', '_'),
-        `class` := "form",
-        id      := formId,
-        onEvent(
-          "submit",
-          e =>
-            e.preventDefault()
-            Page.NoOp
+    div(`class` := "row")(
+      div(`class` := "col-md-5 p-0")(
+        div(`class` := "logo")(
+          img(src := Constants.logoImage)
         )
-      )(
-        renderFormContent()
       ),
-      status.map(s => div(s.message)).getOrElse(div())
+      div(`class` := "col-md-7")(
+        div(`class` := "form-section")(
+          div(`class` := "top-section")(
+            h1(span(title)),
+            maybeRenderErrors()
+          ),
+          form(
+            name    := title.toLowerCase.replace(' ', '_'),
+            `class` := "form",
+            id      := formId,
+            onEvent(
+              "submit",
+              e =>
+                e.preventDefault()
+                Page.NoOp
+            )
+          )(
+            renderFormContent()
+          )
+        )
+      )
     )
 
   final protected def renderInput(
@@ -50,12 +60,16 @@ abstract class FormPage(title: String, status: Option[Page.Status]) extends Page
       isRequired: Boolean,
       onChange: String => Msg
   ) =
-    div(`class` := "form-input")(
-      label(`for` := name, `class` := "form-label")(
-        if (isRequired) span("*") else span(),
-        text(name)
-      ),
-      input(`type` := kind, `class` := "form-control", id := uid, onInput(onChange))
+    div(`class` := "row")(
+      div(`class` := "col-md-12")(
+        div(`class` := "form-input")(
+          label(`for` := name, `class` := "form-label")(
+            if (isRequired) span("*") else span(),
+            text(name)
+          ),
+          input(`type` := kind, `class` := "form-control", id := uid, onInput(onChange))
+        )
+      )
     )
 
   final protected def renderTextArea(name: String, uid: String, isRequired: Boolean, onChange: String => Msg) =
@@ -95,6 +109,9 @@ abstract class FormPage(title: String, status: Option[Page.Status]) extends Page
         height := "180"
       )
     )
+
+  private def maybeRenderErrors() =
+    status.map(s => div(s.message)).getOrElse(div())
 
   private val formId = "form"
   private def clearForm() =
