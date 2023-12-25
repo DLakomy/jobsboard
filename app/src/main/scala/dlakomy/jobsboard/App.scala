@@ -63,6 +63,6 @@ class App extends TyrianApp[App.Msg, App.Model]:
     div(
       Header.view(),
       main(
-        div(`class` := "container=fluid")(model.page.view())
+        div(`class` := "container-fluid")(model.page.view())
       )
     )
