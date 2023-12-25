@@ -2,6 +2,8 @@ package dlakomy.jobsboard.http.routes
 
 import cats.effect.*
 import cats.effect.testing.scalatest.AsyncIOSpec
+import com.stripe.model.checkout.Session
+import com.stripe.param.checkout.SessionCreateParams
 import dlakomy.jobsboard.core.*
 import dlakomy.jobsboard.domain.job.*
 import dlakomy.jobsboard.domain.pagination.Pagination
@@ -62,11 +64,20 @@ class JobRoutesSpec
 
     override def possibleFilters(): IO[JobFilter] =
       IO(defaultFilter)
+
+    override def activate(id: UUID): IO[Int] = IO.pure(1)
   end jobs
+
+  val stripe: Stripe[IO] = new Stripe[IO]:
+    override def createCheckoutSession(jobId: String, userEmail: String): IO[Option[Session]] =
+      IO.pure(Some(Session.create(SessionCreateParams.builder().build())))
+
+    override def handleWebhookEvent[A](payload: String, signature: String, action: String => IO[A]): IO[Option[A]] =
+      IO.pure(None)
 
   given logger: Logger[IO] = Slf4jLogger.getLogger[IO]
   // this is what we are testing
-  val jobRoutes: HttpRoutes[IO] = JobRoutes[IO](jobs).routes
+  val jobRoutes: HttpRoutes[IO] = JobRoutes[IO](jobs, stripe).routes
   val defaultFilter: JobFilter  = JobFilter(companies = List("Awesome Company"))
   ////////////////////////////////////////////////////////////
   // TESTS
