@@ -104,7 +104,7 @@ final case class PostJobPage(
       renderTextArea("Description", "description", true, UpdateDescription(_)),
       renderInput("ExternalUrl", "externalUrl", "text", true, UpdateExternalUrl(_)),
       renderInput("Location", "location", "text", true, UpdateLocation(_)),
-      renderInput("Remote", "remote", "checkbox", true, _ => ToggleRemote),
+      renderToggle("Remote", "remote", true, _ => ToggleRemote),
       renderInput("salaryLo", "salaryLo", "number", false, s => UpdateSalaryLo(parseNumber(s))),
       renderInput("salaryHi", "salaryHi", "number", false, s => UpdateSalaryHi(parseNumber(s))),
       renderInput("Currency", "currency", "text", false, UpdateCurrency(_)),

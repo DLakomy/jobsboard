@@ -73,13 +73,35 @@ abstract class FormPage(title: String, status: Option[Page.Status]) extends Page
       )
     )
 
+  final protected def renderToggle(
+      name: String,
+      uid: String,
+      isRequired: Boolean,
+      onChange: String => Msg
+  ) =
+    div(`class` := "row")(
+      div(`class` := "col-md-12 job")(
+        div(`class` := "form-input form-check form-switch")(
+          label(`for` := name, `class` := "form-check-label")(
+            if (isRequired) span("*") else span(),
+            text(name)
+          ),
+          input(`type` := "checkbox", `class` := "form-check-input", id := uid, onInput(onChange))
+        )
+      )
+    )
+
   final protected def renderTextArea(name: String, uid: String, isRequired: Boolean, onChange: String => Msg) =
-    div(`class` := "form-input")(
-      label(`for` := name, `class` := "form-label")(
-        if (isRequired) span("*") else span(),
-        text(name)
-      ),
-      textarea(`class` := "form-control", id := uid, onInput(onChange))("")
+    div(`class` := "row")(
+      div(`class` := "col-md-12")(
+        div(`class` := "form-input")(
+          label(`for` := name, `class` := "form-label")(
+            if (isRequired) span("*") else span(),
+            text(name)
+          ),
+          textarea(`class` := "form-control", id := uid, onInput(onChange))("")
+        )
+      )
     )
 
   final protected def renderImageUploadInput(
@@ -88,31 +110,31 @@ abstract class FormPage(title: String, status: Option[Page.Status]) extends Page
       imgSrc: Option[String],
       onChange: Option[File] => Msg
   ): Html[Msg] =
-    div(`class` := "form-input")(
-      input(
-        `type`  := "file",
-        `class` := "form-control",
-        id      := uid,
-        accept  := "image/*",
-        onEvent(
-          "change",
-          e =>
-            val imageInput = e.target.asInstanceOf[HTMLInputElement]
-            val fileList   = imageInput.files
-            onChange(fileList.headOption)
+    div(`class` := "row")(
+      div(`class` := "col-md-12")(
+        div(`class` := "form-input")(
+          input(
+            `type`  := "file",
+            `class` := "form-control",
+            id      := uid,
+            accept  := "image/*",
+            onEvent(
+              "change",
+              e =>
+                val imageInput = e.target.asInstanceOf[HTMLInputElement]
+                val fileList   = imageInput.files
+                onChange(fileList.headOption)
+            )
+          )
         )
-      ),
-      img(
-        id     := "preview",
-        src    := imgSrc.getOrElse(""),
-        alt    := "Preview",
-        width  := "180",
-        height := "180"
       )
     )
 
   private def maybeRenderErrors() =
-    status.map(s => div(s.message)).getOrElse(div())
+    status
+      .filter(s => s.kind == Page.StatusKind.ERROR && s.message.nonEmpty)
+      .map(s => div(`class` := "form-errors")(s.message))
+      .getOrElse(div())
 
   private val formId = "form"
   private def clearForm() =
