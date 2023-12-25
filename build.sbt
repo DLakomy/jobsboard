@@ -18,6 +18,7 @@ val testContainerVersion       = "1.19.1"
 val logbackVersion             = "1.4.11"
 val slf4jVersion               = "2.0.9"
 val javaMailVersion            = "1.6.2"
+val stripeVersion              = "24.9.0"
 
 lazy val common = (crossProject(JSPlatform, JVMPlatform) in file("common"))
   .settings(
@@ -80,6 +81,7 @@ lazy val server = project
       "org.slf4j"              % "slf4j-simple"                  % slf4jVersion,
       "io.github.jmcardon"    %% "tsec-http4s"                   % tsecVersion,
       "com.sun.mail"           % "javax.mail"                    % javaMailVersion,
+      "com.stripe"             % "stripe-java"                   % stripeVersion,
       "org.typelevel"         %% "log4cats-noop"                 % log4catsVersion            % Test,
       "org.scalatest"         %% "scalatest"                     % scalaTestVersion           % Test,
       "org.typelevel"         %% "cats-effect-testing-scalatest" % scalaTestCatsEffectVersion % Test,

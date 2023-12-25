@@ -2,7 +2,7 @@
   "company": "aqq 123",
   "title": "some title",
   "description": "some desc",
-  "externalUrl": "gugle.com",
+  "externalUrl": "http://gugle.com",
   "remote": false,
   "location": "here, nearby"
 }
