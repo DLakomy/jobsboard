@@ -12,6 +12,7 @@ import io.circe.generic.auto.*
 import org.http4s.*
 import org.http4s.circe.CirceEntityCodec.*
 import org.http4s.server.*
+import org.typelevel.ci.CIStringSyntax
 import org.typelevel.log4cats.Logger
 import tsec.authentication.asAuthed
 
@@ -86,22 +87,36 @@ class JobRoutes[F[_]: Concurrent: Logger: SecuredHandler] private (jobs: Jobs[F]
 
   ////////// stripe endpoints
   // POST /jobs/promoted { jobInfo } => payment link
-  private val createJobRoutePromoted: HttpRoutes[F] = HttpRoutes.of[F]:
-    case req @ POST -> Root / "promoted" =>
-      req.withValidated[JobInfo]: jobInfo =>
+  private val promotedJobRoute: AuthRoute[F] =
+    case req @ POST -> Root / "promoted" asAuthed _ =>
+      req.request.withValidated[JobInfo]: jobInfo =>
         for
           jobId   <- jobs.create("TODO@lakomy.com", jobInfo)
           session <- stripe.createCheckoutSession(jobId.toString, "TODO@lakomy.com") // TODO
           resp    <- session.map(sesh => Ok(sesh.getUrl)).getOrElse(NotFound())
         yield resp
 
+  private val promotedWebHook: HttpRoutes[F] = HttpRoutes.of[F]:
+    case req @ POST -> Root / "webhook" =>
+      val stripeSigHeader = req.headers.get(ci"Stripe-Signature").flatMap(_.toList.headOption).map(_.value)
+      stripeSigHeader match
+        case Some(signature) =>
+          for
+            payload  <- req.bodyText.compile.string
+            handled  <- stripe.handleWebhookEvent(payload, signature, jobId => jobs.activate(UUID.fromString(jobId)))
+            response <- if (handled.nonEmpty) Ok() else NoContent()
+          yield response
+        case None => Logger[F].info("Got webhook event with no Stripe signature") >> Forbidden()
+
   private val authedRoutes =
     SecuredHandler[F].liftService(
-      createJobRoute.restrictedTo(allRoles) |+| deleteJobRoute.restrictedTo(allRoles) |+| updateJobRoute.restrictedTo(
-        allRoles
-      )
+      promotedJobRoute.restrictedTo(allRoles) |+|
+        createJobRoute.restrictedTo(adminOnly) |+|
+        deleteJobRoute.restrictedTo(allRoles) |+|
+        updateJobRoute.restrictedTo(allRoles)
     )
-  private val unauthedRoutes = allJobsRoute <+> findJobRoute <+> allFiltersRoute <+> createJobRoutePromoted
+  private val unauthedRoutes =
+    allJobsRoute <+> findJobRoute <+> allFiltersRoute <+> promotedWebHook
 
   val routes = Router(
     "/jobs" -> (unauthedRoutes <+> authedRoutes)
