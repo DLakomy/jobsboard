@@ -213,16 +213,19 @@ class LiveJobs[F[_]: MonadCancelThrow: Logger] private (xa: Transactor[F]) exten
 
   def possibleFilters(): F[JobFilter] =
     sql"""
-      SELECT ARRAY_AGG(DISTINCT company) companies
-           , ARRAY_AGG(DISTINCT location) locations
-           , ARRAY_AGG(DISTINCT country) FILTER (WHERE country IS NOT NULL) countries
-           , ARRAY_AGG(DISTINCT seniority) FILTER (WHERE seniority IS NOT NULL) seniorities
-           , ARRAY_AGG(DISTINCT tag) tags
+      WITH active_jobs as (
+        SELECT *
+          FROM jobs
+        WHERE active = true
+      )
+      SELECT ARRAY((SELECT DISTINCT company FROM active_jobs)) companies
+           , ARRAY((SELECT DISTINCT location FROM active_jobs)) locations
+           , ARRAY((SELECT DISTINCT country FROM active_jobs WHERE country IS NOT NULL)) countries
+           , ARRAY((SELECT DISTINCT seniority FROM active_jobs WHERE seniority IS NOT NULL)) seniorities
+           , ARRAY((SELECT DISTINCT UNNEST(tags) FROM active_jobs)) tags
            , MAX(salaryHi) maxSalaryHi
            , false remote
-        FROM jobs
-             LEFT JOIN LATERAL UNNEST (tags) tag ON true
-       WHERE active = true
+        FROM active_jobs
     """
       .query[JobFilter]
       .option
