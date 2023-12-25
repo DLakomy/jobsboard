@@ -91,6 +91,7 @@ class LiveJobs[F[_]: MonadCancelThrow: Logger] private (xa: Transactor[F]) exten
            , other
            , active
         FROM jobs
+       WHERE active = true
     """
       .query[Job]
       .to[List]
@@ -130,7 +131,8 @@ class LiveJobs[F[_]: MonadCancelThrow: Logger] private (xa: Transactor[F]) exten
         Fragments.or(tags.map(tag => fr"$tag=any(tags)")),
       filter.maxSalary.map(salary => fr"salaryHi > $salary"),
       // true - only remotes, false - no preference.
-      filter.remoteOnly.some.filter(identity).map(remote => fr"remote = $remote")
+      filter.remoteOnly.some.filter(identity).map(remote => fr"remote = $remote"),
+      fr"active = true".some
     )
 
     val paginationFr =
@@ -166,6 +168,7 @@ class LiveJobs[F[_]: MonadCancelThrow: Logger] private (xa: Transactor[F]) exten
            , active
         FROM jobs
        WHERE id = $id
+         AND active = true
     """
       .query[Job]
       .option
@@ -210,15 +213,16 @@ class LiveJobs[F[_]: MonadCancelThrow: Logger] private (xa: Transactor[F]) exten
 
   def possibleFilters(): F[JobFilter] =
     sql"""
-      SELECT ARRAY_AGG(distinct company) companies
-           , ARRAY_AGG(distinct location) locations
-           , ARRAY_AGG(distinct country) FILTER (WHERE country IS NOT NULL) countries
-           , ARRAY_AGG(distinct seniority) FILTER (WHERE seniority IS NOT NULL) seniorities
-           , ARRAY_AGG(distinct tag) tags
+      SELECT ARRAY_AGG(DISTINCT company) companies
+           , ARRAY_AGG(DISTINCT location) locations
+           , ARRAY_AGG(DISTINCT country) FILTER (WHERE country IS NOT NULL) countries
+           , ARRAY_AGG(DISTINCT seniority) FILTER (WHERE seniority IS NOT NULL) seniorities
+           , ARRAY_AGG(DISTINCT tag) tags
            , MAX(salaryHi) maxSalaryHi
            , false remote
         FROM jobs
-             CROSS JOIN LATERAL UNNEST (tags) tag
+             LEFT JOIN LATERAL UNNEST (tags) tag ON true
+       WHERE active = true
     """
       .query[JobFilter]
       .option
