@@ -37,9 +37,10 @@ abstract class FormPage(title: String, status: Option[Page.Status]) extends Page
             maybeRenderErrors()
           ),
           form(
-            name    := title.toLowerCase.replace(' ', '_'),
-            `class` := "form",
-            id      := formId,
+            autoComplete := "off",
+            name         := title.toLowerCase.replace(' ', '_'),
+            `class`      := "form",
+            id           := formId,
             onEvent(
               "submit",
               e =>
