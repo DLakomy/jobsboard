@@ -1,5 +1,8 @@
 package dlakomy.jobsboard.common
 
+import org.scalajs.dom.window
+
+import scala.scalajs.LinkingInfo
 import scala.scalajs.js
 import scala.scalajs.js.annotation.*
 
@@ -20,7 +23,9 @@ object Constants:
   val jobAdvertPrice  = "66 PLN"
 
   object endpoints:
-    val root            = "http://localhost:8080"
+    val root =
+      if (LinkingInfo.developmentMode) "http://localhost:8080"
+      else window.location.origin
     val signUp          = s"$root/api/auth/users"
     val login           = s"$root/api/auth/login"
     val logout          = s"$root/api/auth/logout"
