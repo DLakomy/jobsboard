@@ -3,6 +3,8 @@ package dlakomy.jobsboard
 import cats.effect.IO
 import dlakomy.jobsboard.components.*
 import dlakomy.jobsboard.pages.*
+import org.scalajs.dom.KeyboardEvent
+import org.scalajs.dom.document
 import org.scalajs.dom.window
 import tyrian.Html.*
 import tyrian.*
@@ -36,12 +38,18 @@ class App extends TyrianApp[App.Msg, App.Model]:
     (Model(router, session, page), routerCmd |+| sessionCmd |+| pageCmd)
 
   override def subscriptions(model: Model): Sub[IO, Msg] =
-    Sub.make( // listener for browser history changes (like back btn)
+    val urlChange = Sub.make( // listener for browser history changes (like back btn)
       "urlChange",
       model.router.history.state.discrete
         .map(_.get)
         .map(newLocation => Router.ChangeLocation(newLocation, true))
     )
+
+    val enterPress = Sub.fromEvent[IO, KeyboardEvent, Msg]("keyup", document):
+      case e: KeyboardEvent =>
+        Option.when(e.key == "Enter")(Page.EnterPressed)
+
+    urlChange |+| enterPress
 
   override def update(model: Model): Msg => (Model, Cmd[IO, Msg]) =
     case msg: Router.Msg =>

@@ -20,7 +20,7 @@ final case class LoginPage(email: String = "", password: String = "", status: Op
   def update(msg: Page.Msg): (Page, Cmd[IO, App.Msg]) = msg match
     case UpdateEmail(e)    => (this.copy(email = e), Cmd.None)
     case UpdatePassword(p) => (this.copy(password = p), Cmd.None)
-    case AttemptLogin =>
+    case AttemptLogin | Page.EnterPressed =>
       if (!email.matches(Constants.emailRegex))
         (setErrorStatus("Email is invalid"), Cmd.None)
       else if (password.isEmpty)

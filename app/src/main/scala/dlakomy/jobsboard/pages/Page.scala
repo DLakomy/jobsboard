@@ -9,7 +9,8 @@ import tyrian.*
 
 object Page:
   trait Msg
-  case object NoOp extends Msg
+  case object NoOp         extends Msg
+  case object EnterPressed extends Msg
 
   enum StatusKind:
     case SUCCESS, ERROR, LOADING
