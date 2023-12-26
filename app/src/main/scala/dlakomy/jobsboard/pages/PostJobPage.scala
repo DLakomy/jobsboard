@@ -6,8 +6,12 @@ import dlakomy.jobsboard.common.*
 import dlakomy.jobsboard.core.*
 import dlakomy.jobsboard.domain.job.JobInfo
 import io.circe.generic.auto.*
+import org.scalajs.dom.CanvasRenderingContext2D
 import org.scalajs.dom.File
 import org.scalajs.dom.FileReader
+import org.scalajs.dom.HTMLCanvasElement
+import org.scalajs.dom.HTMLImageElement
+import org.scalajs.dom.document
 import tyrian.Html.*
 import tyrian.*
 import tyrian.http.*
@@ -109,14 +113,15 @@ final case class PostJobPage(
         renderInput("Tags", "tags", "text", false, UpdateTags(_)),
         renderInput("Seniority", "seniority", "text", false, UpdateSeniority(_)),
         renderInput("Other", "other", "text", false, UpdateOther(_)),
-        button(`type` := "button", onClick(AttemptPostJob))("Post job")
+        button(`class` := "form-submit-btn", `type` := "button", onClick(AttemptPostJob))(
+          s"Post job - ${Constants.jobAdvertPrice}"
+        )
       )
 
   //////////////////////////////////////////
   // private
   //////////////////////////////////////////
   private def parseNumber(s: String) =
-    // maybe .toOption would be better, ¯\_(ツ)_/¯
     Try(s.toInt).toOption
 
   private def setErrorStatus(message: String) =
@@ -207,7 +212,7 @@ object PostJobPage:
         )
       )
 
-    def loadFile(maybeFile: Option[File]) =
+    def loadFileBasic(maybeFile: Option[File]) =
       Cmd.Run[IO, Option[String], Msg](
         maybeFile.traverse: file =>
           IO.async_ : cb =>
@@ -215,3 +220,37 @@ object PostJobPage:
             reader.onload = _ => cb(Right(reader.result.toString))
             reader.readAsDataURL(file)
       )(UpdateImage(_))
+
+    def loadFile(maybeFile: Option[File]) =
+      Cmd.Run[IO, Option[String], Msg](
+        maybeFile.traverse: file =>
+          IO.async_ : cb =>
+            val reader = new FileReader
+            reader.onload = _ =>
+              val img = document.createElement("img").asInstanceOf[HTMLImageElement]
+              img.addEventListener(
+                "load",
+                _ =>
+                  // resize to 256x256 (some backend limits could be useful too, in the future)
+                  val canvas  = document.createElement("canvas").asInstanceOf[HTMLCanvasElement]
+                  val context = canvas.getContext("2d").asInstanceOf[CanvasRenderingContext2D]
+
+                  val (width, height) = computeDimensions(img.width, img.height)
+                  canvas.width = width
+                  canvas.height = height
+                  context.drawImage(img, 0, 0, canvas.width, canvas.height)
+                  cb(Right(canvas.toDataURL(file.`type`)))
+              )
+              img.src = reader.result.toString
+            reader.readAsDataURL(file)
+      )(UpdateImage(_))
+
+    private def computeDimensions(w: Int, h: Int): (Int, Int) =
+      if (w > h)
+        val ratio = w * 1.0 / 256
+        val w1    = w / ratio
+        val h1    = h / ratio
+        (w1.toInt, h1.toInt)
+      else
+        val (h1, w1) = computeDimensions(h, w)
+        (w1, h1)

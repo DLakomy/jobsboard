@@ -1,31 +1,20 @@
 package dlakomy.jobsboard.components
 
 import dlakomy.jobsboard.App
+import dlakomy.jobsboard.common.Constants
 import dlakomy.jobsboard.core.Router
 import dlakomy.jobsboard.domain.job.Job
 import dlakomy.jobsboard.pages.Page
 import tyrian.Html
 import tyrian.Html.*
 
-import scala.scalajs.js
-import scala.scalajs.js.annotation.*
-
 
 object JobComponents:
-
-  @js.native
-  @JSImport("/static/img/nologo.png", JSImport.Default)
-  private val noLogoImg: String = js.native
 
   def card(job: Job): Html[Router.Msg] =
     div(`class` := "jvm-recent-jobs-cards")(
       div(`class` := "jvm-recent-jobs-card-img")(
-        img(
-          `class` := "img-fluid",
-          src     := job.jobInfo.image.getOrElse(""),
-          alt     := job.jobInfo.title,
-          attribute("onerror", s"this.src='$noLogoImg'")
-        )
+        renderJobImage(job)
       ),
       div(`class` := "jvm-recent-jobs-card-contents")(
         h5(
@@ -64,6 +53,12 @@ object JobComponents:
   def maybeRenderDetail[M <: App.Msg](icon: String, maybeValue: Option[String]): Html[M] =
     maybeValue.map(value => renderDetail(icon, value)).getOrElse(div("")) // I think newer Tyrian has Empty
 
+  def renderJobImage(job: Job) =
+    img(
+      `class` := "img-fluid",
+      src     := job.jobInfo.image.getOrElse(Constants.jobImagePlaceholder),
+      alt     := job.jobInfo.title
+    )
   /////////////// private
   private def fullSalaryString(job: Job) =
     val currency = job.jobInfo.currency.getOrElse("")

@@ -34,7 +34,7 @@ abstract class FormPage(title: String, status: Option[Page.Status]) extends Page
         div(`class` := "form-section")(
           div(`class` := "top-section")(
             h1(span(title)),
-            maybeRenderErrors()
+            maybeRenderStatus()
           ),
           form(
             autoComplete := "off",
@@ -130,10 +130,12 @@ abstract class FormPage(title: String, status: Option[Page.Status]) extends Page
       )
     )
 
-  private def maybeRenderErrors() =
+  private def maybeRenderStatus() =
     status
-      .filter(s => s.kind == Page.StatusKind.ERROR && s.message.nonEmpty)
-      .map(s => div(`class` := "form-errors")(s.message))
+      .map:
+        case Page.Status(message, Page.StatusKind.ERROR)   => div(`class` := "page-status-errors")(message)
+        case Page.Status(message, Page.StatusKind.SUCCESS) => div(`class` := "page-status-success")(message)
+        case Page.Status(message, Page.StatusKind.LOADING) => div(`class` := "page-status-loading")(message)
       .getOrElse(div())
 
   private val formId = "form"

@@ -17,7 +17,7 @@ import java.util.UUID
 
 trait Jobs[F[_]]:
   def create(ownerEmail: String, jobInfo: JobInfo): F[UUID]
-  def all(): F[List[Job]] // TODO possibly redundant
+  def all(): fs2.Stream[F, Job]
   def all(filter: JobFilter, pagination: Pagination): F[List[Job]]
   def find(id: UUID): F[Option[Job]]
   def update(id: UUID, jobInfo: JobInfo): F[Option[Job]]
@@ -27,7 +27,7 @@ trait Jobs[F[_]]:
 
 
 class LiveJobs[F[_]: MonadCancelThrow: Logger] private (xa: Transactor[F]) extends Jobs[F]:
-  def create(ownerEmail: String, jobInfo: JobInfo): F[UUID] =
+  override def create(ownerEmail: String, jobInfo: JobInfo): F[UUID] =
     sql"""
       INSERT INTO jobs(
         date
@@ -70,7 +70,7 @@ class LiveJobs[F[_]: MonadCancelThrow: Logger] private (xa: Transactor[F]) exten
       .withUniqueGeneratedKeys[UUID]("id")
       .transact(xa)
 
-  def all(): F[List[Job]] =
+  override def all(): fs2.Stream[F, Job] =
     sql"""
       SELECT id
            , date
@@ -94,10 +94,10 @@ class LiveJobs[F[_]: MonadCancelThrow: Logger] private (xa: Transactor[F]) exten
        WHERE active = true
     """
       .query[Job]
-      .to[List]
+      .stream
       .transact(xa)
 
-  def all(filter: JobFilter, pagination: Pagination): F[List[Job]] =
+  override def all(filter: JobFilter, pagination: Pagination): F[List[Job]] =
     val selectFr =
       fr"""
         SELECT id
@@ -135,10 +135,11 @@ class LiveJobs[F[_]: MonadCancelThrow: Logger] private (xa: Transactor[F]) exten
       fr"active = true".some
     )
 
+    val orderFragment = fr"ORDER BY date DESC"
     val paginationFr =
-      fr"ORDER BY id LIMIT ${pagination.limit} OFFSET ${pagination.offset}"
+      fr"LIMIT ${pagination.limit} OFFSET ${pagination.offset}"
 
-    val statement = selectFr |+| fromFr |+| whereFr |+| paginationFr
+    val statement = selectFr |+| fromFr |+| whereFr |+| orderFragment |+| paginationFr
 
     statement
       .query[Job]
@@ -146,7 +147,7 @@ class LiveJobs[F[_]: MonadCancelThrow: Logger] private (xa: Transactor[F]) exten
       .transact(xa)
       .logError(e => s"Failed query: ${e.getMessage}")
 
-  def find(id: UUID): F[Option[Job]] =
+  override def find(id: UUID): F[Option[Job]] =
     sql"""
       SELECT id
            , date
@@ -174,7 +175,7 @@ class LiveJobs[F[_]: MonadCancelThrow: Logger] private (xa: Transactor[F]) exten
       .option
       .transact(xa)
 
-  def update(id: UUID, jobInfo: JobInfo): F[Option[Job]] =
+  override def update(id: UUID, jobInfo: JobInfo): F[Option[Job]] =
     sql"""
       UPDATE jobs
          SET company = ${jobInfo.company}
@@ -196,7 +197,7 @@ class LiveJobs[F[_]: MonadCancelThrow: Logger] private (xa: Transactor[F]) exten
       .transact(xa)
       .flatMap(_ => find(id))
 
-  def activate(id: UUID): F[Int] =
+  override def activate(id: UUID): F[Int] =
     sql"""
       UPDATE jobs
          SET active = true
@@ -204,14 +205,14 @@ class LiveJobs[F[_]: MonadCancelThrow: Logger] private (xa: Transactor[F]) exten
     """.update.run
       .transact(xa)
 
-  def delete(id: UUID): F[Int] =
+  override def delete(id: UUID): F[Int] =
     sql"""
       DELETE FROM jobs
        WHERE id = $id
     """.update.run
       .transact(xa)
 
-  def possibleFilters(): F[JobFilter] =
+  override def possibleFilters(): F[JobFilter] =
     sql"""
       WITH active_jobs as (
         SELECT *

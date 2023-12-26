@@ -1,3 +1,48 @@
+html {
+  /* dunno if correct, but I've been frustrated */
+  overflow-x: hidden;
+}
+
+.app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.footer {
+  background-color: white;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px 0 10px 0;
+  margin-top: auto;
+}
+
+.section-1 {
+  margin-bottom: 10px;
+}
+
+.container-fluid {
+  padding: 0;
+}
+
+.job-list-hero {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  height: 200px;
+  background-size: 300%;
+  background-image:
+    linear-gradient(-45deg, rgb(38, 145, 207) 0%, rgb(43, 54, 160) 25%, rgb(96, 54, 127) 50%, rgb(153, 67, 67) 100%);
+  animation: animateBG 20s ease infinite;
+  max-width: 100%;
+}
+
+.job-list-title {
+  color: white;
+  margin: auto;
+}
+
 .home-logo {
   height: 50px;
 }
@@ -191,10 +236,20 @@ textarea.form-control {
   font-family: monospace;
 }
 
-/* good enough :D */
-.form-errors {
+/* good enough :D (bullets would be noicer) */
+.page-status-errors {
   border: 1px solid red;
   padding: 10px;
+  color: red;
+  margin: 10px;
+  border-radius: 5px;
+}
+
+.page-status-success {
+  border: 1px solid green;
+  padding: 10px;
+  color: green;
+  margin: 10px;
   border-radius: 5px;
 }
 
@@ -208,4 +263,10 @@ textarea.form-control {
   display: flex;
   align-items: center;
   flex-direction: column;
+}
+
+
+.form-submit-btn {
+  width: 100%;
+  margin-bottom: 20px;
 }

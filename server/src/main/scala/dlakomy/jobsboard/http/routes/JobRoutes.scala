@@ -88,11 +88,11 @@ class JobRoutes[F[_]: Concurrent: Logger: SecuredHandler] private (jobs: Jobs[F]
   ////////// stripe endpoints
   // POST /jobs/promoted { jobInfo } => payment link
   private val promotedJobRoute: AuthRoute[F] =
-    case req @ POST -> Root / "promoted" asAuthed _ =>
+    case req @ POST -> Root / "promoted" asAuthed user =>
       req.request.withValidated[JobInfo]: jobInfo =>
         for
-          jobId   <- jobs.create("TODO@lakomy.com", jobInfo)
-          session <- stripe.createCheckoutSession(jobId.toString, "TODO@lakomy.com") // TODO
+          jobId   <- jobs.create(user.email, jobInfo)
+          session <- stripe.createCheckoutSession(jobId.toString, user.email)
           resp    <- session.map(sesh => Ok(sesh.getUrl)).getOrElse(NotFound())
         yield resp
 
