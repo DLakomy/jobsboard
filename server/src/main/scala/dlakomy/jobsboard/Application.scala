@@ -30,7 +30,7 @@ object Application extends IOApp.Simple:
                 .default[IO]
                 .withHost(emberConfig.host)
                 .withPort(emberConfig.port)
-                .withHttpApp(CORS(httpApi.endpoints).orNotFound) // FIXME configure CORS properly
+                .withHttpApp(httpApi.endpoints.orNotFound) // FIXME configure CORS properly
                 .build
           yield server
 

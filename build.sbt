@@ -94,3 +94,17 @@ lazy val server = project
     run / connectInput   := true
   )
   .dependsOn(common.jvm)
+
+
+lazy val stagingBuild = (project in (file("build/staging")))
+  .enablePlugins(JavaAppPackaging, DockerPlugin)
+  .settings(
+    name            := "jobsboard-staging",
+    scalaVersion    := scala3Version,
+    organization    := myOrganization,
+    dockerBaseImage := "openjdk:11-jre-slim-buster",
+    dockerExposedPorts ++= Seq(4041),
+    Compile / mainClass         := Some("dlakomy.jobsboard.Application"),
+    Compile / resourceDirectory := ((server / Compile / resourceDirectory).value / "staging")
+  )
+  .dependsOn(server)
