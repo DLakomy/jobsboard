@@ -24,7 +24,7 @@ object Constants:
 
   object endpoints:
     val root =
-      if (LinkingInfo.developmentMode) "http://localhost:8080"
+      if (LinkingInfo.developmentMode) "http://localhost:1234"
       else window.location.origin
     val signUp          = s"$root/api/auth/users"
     val login           = s"$root/api/auth/login"
