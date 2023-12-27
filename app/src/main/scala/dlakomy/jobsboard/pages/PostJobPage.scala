@@ -212,15 +212,6 @@ object PostJobPage:
         )
       )
 
-    def loadFileBasic(maybeFile: Option[File]) =
-      Cmd.Run[IO, Option[String], Msg](
-        maybeFile.traverse: file =>
-          IO.async_ : cb =>
-            val reader = new FileReader
-            reader.onload = _ => cb(Right(reader.result.toString))
-            reader.readAsDataURL(file)
-      )(UpdateImage(_))
-
     def loadFile(maybeFile: Option[File]) =
       Cmd.Run[IO, Option[String], Msg](
         maybeFile.traverse: file =>
@@ -246,7 +237,7 @@ object PostJobPage:
       )(UpdateImage(_))
 
     private def computeDimensions(w: Int, h: Int): (Int, Int) =
-      if (w > h)
+      if (w >= h)
         val ratio = w * 1.0 / 256
         val w1    = w / ratio
         val h1    = h / ratio
