@@ -217,7 +217,7 @@ class LiveJobs[F[_]: MonadCancelThrow: Logger] private (xa: Transactor[F]) exten
       WITH active_jobs as (
         SELECT *
           FROM jobs
-        WHERE active = true
+         WHERE active = true
       )
       SELECT ARRAY((SELECT DISTINCT company FROM active_jobs)) companies
            , ARRAY((SELECT DISTINCT location FROM active_jobs)) locations

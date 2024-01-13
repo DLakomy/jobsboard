@@ -46,12 +46,12 @@ final class LiveUsers[F[_]: MonadCancelThrow: Logger] private (xa: Transactor[F]
       _ <-
         sql"""
           UPDATE users
-            SET hashedPassword = ${user.hashedPassword}
-              , firstName = ${user.firstName}
-              , lastName = ${user.lastName}
-              , company = ${user.company}
-              , role = ${user.role}
-          WHERE email = ${user.email}
+             SET hashedPassword = ${user.hashedPassword}
+               , firstName = ${user.firstName}
+               , lastName = ${user.lastName}
+               , company = ${user.company}
+               , role = ${user.role}
+           WHERE email = ${user.email}
         """.update.run.transact(xa)
       maybeUser <- find(user.email)
     yield maybeUser
