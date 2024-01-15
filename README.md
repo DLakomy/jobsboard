@@ -24,7 +24,7 @@ and upload the contents of the `dist` directory to your staging, to the director
 Then configure you server (`nginx`/`apache`/whatever) so that all calls to `…/api` are routed to the backend (adjust the port). Define the error page  404 so that se server responds with 200 and serves `index.html` (the app will handle the error). Eg. for nginx:
 
 ```
-locatoin /api {
+location /api {
     proxy_pass http://localhost:4041
 }
 
