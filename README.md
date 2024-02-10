@@ -34,4 +34,4 @@ error page 404 =200 /index.html;
 And… run the app. Don’t forget to provide a Postgres DB with the schema described in `sql/init.sql` ;)
 
 ## My certificate 🎉
-![Screenshot of a comment on a GitHub issue showing an image, added in the Markdown, of an Octocat smiling and raising a tentacle.](certificate_of_completion.png)
+![My certificate.](certificate_of_completion.png)
