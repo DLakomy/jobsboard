@@ -28,7 +28,7 @@ location /api {
     proxy_pass http://localhost:4041
 }
 
-error page 404 =200 /index.html;
+error_page 404 =200 /index.html;
 ```
 
 And… run the app. Don’t forget to provide a Postgres DB with the schema described in `sql/init.sql` ;)
